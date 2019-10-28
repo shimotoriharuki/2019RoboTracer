@@ -159,7 +159,6 @@ int main(void)
 	int sample_data3 = -1000;
 
 	float get_data = 0;
-	int a = 0;
 
 	init();
 	/*
