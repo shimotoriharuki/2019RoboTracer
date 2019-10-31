@@ -11,10 +11,13 @@
 
 
 void select_open_filename(char);		//ファイルを選択する
+void select_open_filename_2(void);		//ファイルを選択する
+void create_path(char, char);
 FRESULT sd_mount(void);   					//SDをマウント
 FRESULT sd_unmount(char);					  //SDをアンマウント
-FRESULT sd_write(char, float); 	 //SDに書き込み
-FRESULT sd_read(char ,float *);		//SDから読み込み
+FRESULT sd_write(char, short, float *, char); 	 //SDに書き込み
+FRESULT sd_write_2(char, char , short, float *, char); 	 //SDに書き込み
+FRESULT sd_read(char, short, float *);		//SDから読み込み
 void bufclear(void);
 
 

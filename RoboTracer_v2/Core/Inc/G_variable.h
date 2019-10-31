@@ -87,6 +87,7 @@ int Line1, Line2, Line3, Line4, SideL, SideR, Pot;
 int Def_ref;
 int total_encL, total_encR;
 int total_encL_memory, total_encR_memory;
+short total_encL_distance, total_encR_distance;
 signed char enc_overL, enc_overR;
 
 int cycle_encL, cycle_encR;
@@ -145,6 +146,10 @@ short number_stored;
 int test_aaray[TEST_SIZE];
 
 char sd_mount_check;
+float xg_l, yg_l, zg_l;
+//short encorder_memory_2[MEMORY_ARRAY_SIZE_2];
+short radius_memory_2[MEMORY_ARRAY_SIZE_2];
+char fileName[][64] = {ENCORDER_LOG_TXT, IMU_LOG_TXT, POT_LOG_TXT};
 
 #else
 /* 自動生成変数 (CubeMXから変更を加えた場合変える必要があるかも)-------------------------------------------------------------*/
@@ -175,6 +180,7 @@ extern int Line1, Line2, Line3, Line4, SideL, SideR, Pot;
 extern int Def_ref;
 extern int total_encL, total_encR;
 extern int total_encL_memory, total_encR_memory;
+extern short total_encL_distance, total_encR_distance;
 extern signed char enc_overL, enc_overR;
 
 extern int cycle_encL, cycle_encR;
@@ -229,4 +235,10 @@ extern short number_stored;
 extern int test_aaray[TEST_SIZE];
 
 extern char sd_mount_check;
+extern float xg_l, yg_l, zg_l;
+
+//extern short encorder_memory_2[MEMORY_ARRAY_SIZE_2];
+extern short radius_memory_2[MEMORY_ARRAY_SIZE_2];
+extern char fileName[3];
+
 #endif

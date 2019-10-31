@@ -16,7 +16,7 @@ char R_SW(void);
 int getEncorder_L(void);
 int getEncorder_R(void);
 void enc_reset(void);
-void updata_enc_cnt(int *,int *, int *,int *);
+void updata_enc_cnt(int *, int *, int *, int *, short *, short *);
 char debug_lcd(void);
 void updata_ADval(void);
 char vcm_kill(char, float);
@@ -68,6 +68,10 @@ void create_speed_table_2(void);
 void mesurment_reset(void);
 
 char encorder_correction(short, int);
+
+short course_memory_const_distance(char enable);
+void updata_imu_data_lowpassed(void);
+float lowpass_filter_simple(int, int, char);
 
 
 

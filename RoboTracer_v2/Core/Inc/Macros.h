@@ -15,7 +15,7 @@
 #define ANGLE_LIMIT_LOW -100	//-300
 #define ENC_LIMIT 65535
 #define ENCORDER_OFFSET 30000
-#define MM_PER_PULS 0.017795715859364		//1パルスで進む距離[mm] (タイヤ1周で進タ距離 / タイヤ1周のパルス数)	0.017795715859364	
+#define MM_PER_PULS 0.017795715859364		//1パルスで進む距離[mm] (タイヤ1周で進タ距離 / タイヤ1周のパルス数)	0.017795715859364	1mm進んだ時のカウント　56.19556055
 #define MM19_PER_MPP 1200				//19[mm]で来るパルス数　　(19 / MM_PER_PULS = 1089.693641)	1090
 #define MM19_PER_MPP2 2500				//19[mm]で来るパルス数　　(19 / MM_PER_PULS = 1089.693641)
 #define MM19_PER_MPP_PLUS 2000				//19[mm]で来るパルス数　多め
@@ -74,8 +74,30 @@
 #define RAD_PER_AD (DEG160_TO_RAD / AD_RESOLUTION)
 #define TEST_SIZE 1
 
+#define COUNT_TO_RECORD 56.19556055 //[mm]
+#define R 0.8
+
+#define MEMORY_ARRAY_SIZE_2 6000
+
 //SD file name
+
 #define ENCORDER_LOG 0
 #define IMU_LOG 1
 #define POT_LOG 2
 #define LINE_SENSOR_LOG 3
+
+#define FOLDER_0 '0'
+#define FOLDER_1 '1'
+#define FOLDER_2 '2'
+
+#define ENCORDER_LOG_TXT "encorder_log.txt"
+#define IMU_LOG_TXT "imu_log.txt"
+#define POT_LOG_TXT "pot_log.txt"
+#define LINE_SENSOR_LOG_TXT "line_sensor_log.txt"
+
+//
+
+
+#define OVER_WRITE 0	//上書き
+#define ADD_WRITE 1		//追加書き
+

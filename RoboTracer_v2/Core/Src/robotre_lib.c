@@ -362,6 +362,11 @@ char running_processing(){
 		total_encL_memory = total_encR_memory = total_encL = total_encR = 0;
 		flag.enc_memory_reset = 0;
 	}
+	/*-----------------一定距離でコース記憶-------------------*/
+
+
+
+
 	/*-----------------再生走行時リセット(2走目以降)-------------------*/
 	if(start_goal_cnt == 1 && flag.speed_updata == 1){
 
@@ -392,7 +397,7 @@ char running_processing(){
 	/*----------------マーカー処理-------------------*/
 	if(cross_line_ignore == 0){
 		/*--------スタート・ゴールマーカ---------*/
-		#ifndef REVERCE_RUN
+#ifndef REVERCE_RUN
 		//通常周回
 		if(getDigital('R') == 1 && getDigital('L') == 0 && read_startgoal_line == 1){
 			start_goal_cnt++;
@@ -434,7 +439,7 @@ char running_processing(){
 			//LED('N');
 		}
 
-		#else
+#else
 		//逆走周回
 		if(getDigital('L') == 1 && getDigital('R') == 0 && read_startgoal_line == 1){
 			start_goal_cnt++;
@@ -473,7 +478,7 @@ char running_processing(){
 		else{
 			//LED('W');
 		}
-		#endif
+#endif
 	}
 
 	if(flag.error)	LED('M');
@@ -613,7 +618,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//タイマー割�
 
 	hand_push_trace(flag.hand_push);
 
-	updata_enc_cnt(&total_encL, &total_encR, &total_encL_memory, &total_encR_memory);
+	updata_enc_cnt(&total_encL, &total_encR, &total_encL_memory, &total_encR_memory, &total_encL_distance, &total_encR_distance);
 
 	enc_reset();	//初期値にする
 
@@ -970,8 +975,8 @@ float getRadius_imu(){
 
 //************************************************************************/
 //* 役割　：　コース記憶に関するデータを配列にぶちこむ
-//* 引数　：　void:
-//* 戻り値：　void:
+//* 引数　：　char: enable or disable
+//* 戻り値：　short: array number
 //* 備考 :
 //************************************************************************/
 short course_memory(char enable){
@@ -1018,6 +1023,62 @@ short course_memory(char enable){
 	return memory_access;
 }
 
+//************************************************************************/
+//* 役割　：　コース記憶に関するデータを配列にぶちこむ
+//* 引数　：　char: enable(1) or reset(0)
+//* 戻り値：　short: array number
+//* 備考 :
+//************************************************************************/
+short course_memory_const_distance(char enable){
+	float ave_total = (total_encL_distance + total_encR_distance) / 2;
+	static short data_access = 0;
+
+	if(enable){
+		if(ave_total >= COUNT_TO_RECORD){
+			radius_memory[data_access] = zg_l;
+			total_encL_distance = total_encR_distance = 0;
+			data_access++;
+		}
+	}
+	else {
+		data_access = 0;
+	}
+
+	if(data_access >= MEMORY_ARRAY_SIZE_2)	data_access = MEMORY_ARRAY_SIZE_2 - 1;
+
+	return data_access;
+}
+
+//************************************************************************/
+//* 役割　：　簡易ローパスフィルタを通したimuのデータを更新する
+//* 引数　：　void:
+//* 戻り値：　void:
+//* 備考 :
+//************************************************************************/
+void updata_imu_data_lowpassed(){
+	static float pre_xg = 0, pre_yg = 0, pre_zg = 0;
+
+	xg_l = lowpass_filter_simple(xg, pre_xg, R);
+	yg_l = lowpass_filter_simple(yg, pre_yg, R);
+	zg_l = lowpass_filter_simple(zg, pre_zg, R);
+
+	pre_xg = xg_l;
+	pre_yg = yg_l;
+	pre_zg = zg_l;
+
+}
+
+//************************************************************************/
+//* 役割　：　簡易ローパスフィルタ
+//* 引数　：　void:
+//* 戻り値：　void:
+//* 備考 :
+//************************************************************************/
+float lowpass_filter_simple(int x, int x0, char r){
+
+	return ((r)*(x) + (1.0 - (r))* (x0));
+
+}
 //************************************************************************/
 //* 役割　：　再生走行中白線読んだらエンコーダ値補正する
 //* 引数　：　void:
@@ -2514,13 +2575,15 @@ void enc_reset(){	//1周期でリセット
 //* 戻り値：　void:
 //* 備考 : なし
 //************************************************************************/
-void updata_enc_cnt(int*encL, int *encR, int*encL_memory, int *encR_memory){
+void updata_enc_cnt(int*encL, int *encR, int*encL_memory, int *encR_memory, short *encL_distance, short *encR_distance){
 	//static unsigned short pre_L, pre_R;	//オーバーフロー対策
 
 	*encL += getEncorder_L();
 	*encR += getEncorder_R();
 	*encL_memory += getEncorder_L();
 	*encR_memory += getEncorder_R();
+	encL_distance += getEncorder_L();
+	encR_distance += getEncorder_R();
 
 	/*　//オーバーフロー対策
 	if(*encL - pre_L < -10000) enc_overL++;

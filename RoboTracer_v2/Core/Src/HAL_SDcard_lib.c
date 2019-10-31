@@ -8,12 +8,14 @@
 #include <stdio.h>
 #include "fatfs.h"
 
-#include "HAL_SDcard_lib.h"
-#include "fatfs_sd.h"
-#include "string.h"
 #include "Macros.h"
+#include "HAL_SDcard_lib.h"
+#include "string.h"
 
-#define BUFF_SIZE 1024
+#include "fatfs_sd.h"
+
+
+#define BUFF_SIZE 256
 
 FATFS fs;	//ファイルシステムのやつ
 FIL fil;	//ファイルのやつ
@@ -25,21 +27,60 @@ FATFS *pfs;
 DWORD fre_clust;
 uint32_t total, free_space;
 
+char filepath[256];
+char dirpath[256];
+
+
+
 //************************************************************************/
 //* 役割　：　SDに書き込む
-//* 引数　：　char, float: ファイル選択, データ
+//* 引数　：　char, short, float: ファイル選択, 配列の数, データ
 //* 戻り値：　char: 状態チェック	0(SDカードがない) or 1(成功) or 2(マウント失敗)
 //* 備考 : なし
 //************************************************************************/
-FRESULT sd_write(char f_sel, float data){
+FRESULT sd_write(char f_sel, short size, float *data, char state){
 	FRESULT ret = 0;
 
-	snprintf(buffer, BUFF_SIZE, "%f\n", data);	//floatをstringに変換
+	if(state == OVER_WRITE) f_unlink("/encorder_log.txt\0");
 
 	select_open_filename(f_sel);	//書き込むファイルを選択
-	f_write(&fil, buffer, BUFF_SIZE, &bw);	//書き込む
 
-	bufclear();	//書き込み用のバッファをクリア
+	for(short i = 0 ; i < size; i++){
+		snprintf(buffer, BUFF_SIZE, "%f\n", *(data + i));	//floatをstringに変換
+
+		f_lseek(&fil, f_size(&fil));	//ファイルの最後に移動
+		f_write(&fil, buffer, strlen(buffer), &bw);	//書き込む
+
+		bufclear();	//書き込み用のバッファをクリア
+	}
+	f_close(&fil);	//ファイル閉じる
+
+	return ret;
+}
+
+//************************************************************************/
+//* 役割　：　SDに書き込む_2
+//* 引数　：　char, short, float: ファイル選択, 配列の数, データ
+//* 戻り値：　char: 状態チェック	0(SDカードがない) or 1(成功) or 2(マウント失敗)
+//* 備考 : なし
+//************************************************************************/
+FRESULT sd_write_2(char folder_number_char, char file_number, short size, float *data, char state){
+	FRESULT ret = 0;
+
+	create_path(folder_number_char, file_number);
+
+	if(state == OVER_WRITE) f_unlink(filepath);	//一回消す
+
+	select_open_filename_2();	//書き込むファイルを選択
+
+	for(short i = 0 ; i < size; i++){
+		snprintf(buffer, BUFF_SIZE, "%f\n", *(data + i));	//floatをstringに変換
+
+		f_lseek(&fil, f_size(&fil));	//ファイルの最後に移動
+		f_write(&fil, buffer, strlen(buffer), &bw);	//書き込む
+
+		bufclear();	//書き込み用のバッファをクリア
+	}
 	f_close(&fil);	//ファイル閉じる
 
 	return ret;
@@ -51,15 +92,35 @@ FRESULT sd_write(char f_sel, float data){
 //* 戻り値：　char: 状態チェック	0(Sdカードがない) or 1(成功) or 2(マウント失敗)
 //* 備考 : なし
 //************************************************************************/
-FRESULT sd_read(char f_sel, float *data){
+FRESULT sd_read(char f_sel, short size, float *data){
 	FRESULT ret = 0;
+	float test = 0;
+	short i = 0;
+
+
 
 	select_open_filename(f_sel);	//書き込むファイルを選択
-	f_read (&fil, buffer, BUFF_SIZE, &br);
 
-	sscanf(buffer, "%f", data);
+	//for(short i = 0 ; i < size; i++){
+		while(f_gets(buffer, sizeof(buffer), &fil) != NULL){
+			sscanf(buffer, "%f", data + i);
+			i++;
+			if(i >= size) i = size - 1;
+			//printf("%f\r\n", test);
+		}
 
-	bufclear();	//書き込み用のバッファをクリア
+
+		bufclear();	//書き込み用のバッファをクリア
+		//printf("%f\r\n", test);
+
+
+		//sscanf(buffer, "%f", (data + i));
+
+		//printf("%f\r\n", test);
+
+
+	//}
+
 	f_close(&fil);	//ファイル閉じる
 
 	return ret;
@@ -96,12 +157,42 @@ FRESULT sd_unmount(char f_sel){
 }
 
 //************************************************************************/
+//* 役割　：　操作するパスの文字列を作る
+//* 引数　：　char, char: フォルダー選択, ファイル選択
+//* 戻り値：　void:
+//* 備考 : なし
+//************************************************************************/
+void create_path(char folder_number_char, char file_number){
+
+	sprintf(dirpath, "log_folder_%c.txt", folder_number_char);
+
+	switch (file_number){
+		case ENCORDER_LOG:
+			strcpy(filepath, ENCORDER_LOG_TXT);
+		break;
+		case IMU_LOG:
+			strcpy(filepath, IMU_LOG_TXT);
+		break;
+
+		case POT_LOG:
+			strcpy(filepath, POT_LOG_TXT);
+		break;
+
+		case LINE_SENSOR_LOG:
+			strcpy(filepath, LINE_SENSOR_LOG_TXT);
+		break;
+
+	}
+
+}
+//************************************************************************/
 //* 役割　：　操作するファイルを選択する
 //* 引数　：　char: ファイル選択
 //* 戻り値：　char: 状態チェック	0(マウント失敗) or 1(成功)
 //* 備考 : なし
 //************************************************************************/
 void select_open_filename(char f_sel){
+/*
 	switch(f_sel){
 		case ENCORDER_LOG:
 			f_open(&fil, "encorder_log.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
@@ -120,10 +211,28 @@ void select_open_filename(char f_sel){
 		break;
 
 	}
+*/
 
 }
 
+//************************************************************************/
+//* 役割　：　操作するファイルを選択する_2
+//* 引数　：　char: ファイル選択
+//* 戻り値：　char: 状態チェック	0(マウント失敗) or 1(成功)
+//* 備考 : なし
+//************************************************************************/
+void select_open_filename_2(){	//mkdir
 
+	f_mkdir(dirpath);
+
+	f_chdir(dirpath);
+
+	f_open(&fil, filepath, FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
+
+	f_chdir("..");
+
+
+}
 //************************************************************************/
 //* 役割　：　バッファをクリア
 //* 引数　：　void:
@@ -131,7 +240,7 @@ void select_open_filename(char f_sel){
 //* 備考 : なし
 //************************************************************************/
 void bufclear(void){
-	for(int i = 0; i < 1024; i++){
+	for(int i = 0; i < BUFF_SIZE; i++){
 		buffer[i] = '\0';
 	}
 }
