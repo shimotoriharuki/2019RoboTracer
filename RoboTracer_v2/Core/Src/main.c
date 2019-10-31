@@ -25,14 +25,16 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-#include "HAL_SDcard_lib.h"
+
 #include "robotre_lib.h"
+//#include "HAL_SDcard_lib.h"
 
 #include "Macros.h"
 #define  DEF_EXTERN				/*グローバル変数アクヿィヿ*/
 #include "G_variable.h"
 #include "AQM0802.h"
 #include "ICM_20648.h"
+
 /*
 #include "fatfs_sd.h"
 #include "string.h"
@@ -159,45 +161,53 @@ int main(void)
 
 	char stage = 10;
 	signed char run_check = 0;
-	float sample_data = 100;
-	double sample_data2 = 321;
-	int sample_data3 = 1000;
-	float sample[SIZE_DATA];
-	float get[SIZE_GET];
+
+	float sample[SIZE_DATA], sample2[SIZE_DATA];
+	float get[SIZE_DATA];
 
 	float get_data = 0;
 
-	char number[2]={'1','2'};
-
-	char directory[2]={'1','2'};
+	float sam1 = 2, sam2 = 40, sam3 = 862;
 
 	init();
 
-
 	for(short i = 0; i < SIZE_DATA; i++){
-		sample[i] = (float)i;
+		sample[i] = i;
+		sample2[i] = i * 0.001;
 	}
 
 	if(sd_mount_check == 1) printf("SD mount successful\r\n");
 	else printf("SD mount unsuccessful\r\n");
 
-	//sprintf(filepath, "./%c.txt", namae[0]);
+	/*
+	sd_write(FOLDER_0, ENCORDER_LOG, SIZE_DATA, sample, ADD_WRITE);
 
-	//sd_write(ENCORDER_LOG, SIZE_DATA, sample, OVER_WRITE);
-	sd_write_2(FOLDER_0, ENCORDER_LOG, SIZE_DATA, sample, ADD_WRITE);
-	sd_write_2(FOLDER_1 ,POT_LOG, SIZE_DATA, sample, OVER_WRITE);
-	//sd_read(ENCORDER_LOG, SIZE_GET, get);
+	sd_write(FOLDER_0, IMU_LOG, SIZE_DATA, sample, ADD_WRITE);
+	sd_write(FOLDER_0, POT_LOG, SIZE_DATA, sample, ADD_WRITE);
+	sd_write(FOLDER_0, LINE_SENSOR_LOG, SIZE_DATA, sample, ADD_WRITE);
 
-	for(short i = 0; i < SIZE_GET; i++){
-		//sd_read(ENCORDER_LOG, 0, &get_data);
-		//printf("%f\r\n", get[i]);
+	sd_write(FOLDER_1 ,ENCORDER_LOG, SIZE_DATA, sample2, OVER_WRITE);
+	sd_write(FOLDER_1 ,IMU_LOG, SIZE_DATA, sample2, OVER_WRITE);
+	sd_write(FOLDER_1 ,POT_LOG, SIZE_DATA, sample2, OVER_WRITE);
+	sd_write(FOLDER_1 ,LINE_SENSOR_LOG, SIZE_DATA, sample2, OVER_WRITE);
+
+	sd_write(FOLDER_2 ,ENCORDER_LOG, 1, &sam1, ADD_WRITE);
+	sd_write(FOLDER_2 ,IMU_LOG, 1, &sam2, ADD_WRITE);
+	sd_write(FOLDER_2 ,POT_LOG, 1, &sam3, ADD_WRITE);
+	sd_write(FOLDER_2 ,LINE_SENSOR_LOG, 1, &sam2, ADD_WRITE);
+
+	sd_write(FOLDER_3 ,ENCORDER_LOG, 1, &sam1, OVER_WRITE);
+	sd_write(FOLDER_3 ,IMU_LOG, 1, &sam2, OVER_WRITE);
+	sd_write(FOLDER_3 ,POT_LOG, 1, &sam3, OVER_WRITE);
+	sd_write(FOLDER_3 ,LINE_SENSOR_LOG, 1, &sam3, OVER_WRITE);
+
+
+	sd_read(FOLDER_0, ENCORDER_LOG, SIZE_DATA, get);
+
+	for(short i = 0; i < SIZE_DATA; i++){
+		printf("%f\r\n", get[i]);
 	}
-
-	//sd_write(IMU_LOG, sample_data);
-	//sd_write(POT_LOG, sample_data2);
-
-	//sd_write(LINE_SENSOR_LOG, sample_data3);
-
+	*/
 
 
   /* USER CODE END 2 */

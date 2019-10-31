@@ -7,12 +7,19 @@
 
 #include <stdio.h>
 #include "main.h"
-#include "robotre_lib.h"
+
 #include "Macros.h"
 #include "G_variable.h"
+
 #include "AQM0802.h"
 #include "math.h"
 #include "ICM_20648.h"
+
+#include "fatfs.h"
+#include "HAL_SDcard_lib.h"
+
+#include "robotre_lib.h"
+
 
 //************************************************************************/
 //* 役割　：　LCDでデバッグする関数
@@ -29,12 +36,29 @@ char debug_lcd(){
 		//--------------------------------------------------------
 		switch(R_SW()){
 			case 0:
+				/*
 				lcd_clear();
 				lcd_locate(0,0);
 				lcd_printf("%4d%4d", Line2, Line3);
 				lcd_locate(0,1);
 				lcd_printf("%4d%4d", Line1, Line4);
 				LED('B');
+				*/
+
+				lcd_clear();
+				lcd_locate(0,0);
+				lcd_printf("imu_test");
+				lcd_locate(0,1);
+				lcd_printf("        ");
+				LED('B');
+
+				if(SW(1)){//
+					sd_write(FOLDER_0, IMU_LOG1, MEMORY_ARRAY_SIZE_2, radius_memory_2, OVER_WRITE);
+					sd_write(FOLDER_0, IMU_LOG2, MEMORY_ARRAY_SIZE_2, radius_memory_3, OVER_WRITE);
+					printf("sd_write\r\n");
+					flag.imu_store_2 = 100;
+
+				}
 
 			break;
 			/*
@@ -316,7 +340,7 @@ void debug_pcprintf(){
 
 	//printf("L0 = %d L1 = %d L2 = %d L3 = %d O0 = %d O1 = %d O2 = %d\r\n", ad2[0], ad2[1], ad2[2], ad2[3], ad1[0], ad1[1], ad1[2]);
 	//printf("%4d %4d %4d %4d %4d %4d %4d\r\n", Line1, Line2, Line3, Line4, SideL, SideR, Def_ref);
-	//printf("imu : %d\r\n",xg);
+	//printf("imu : %f\r\n",xg_l);
 
 
 }
@@ -590,15 +614,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//タイマー割�
 	increment_mytimer();
 	accelerator(flag.acc, increment_acc);
 
-	if(timer.imu_timer >= 4){
-		read_gyro_data();
-		read_accel_data();
-
-	store_imu_data(flag.imu_store);
-		timer.imu_timer = 0;
-	}
-
-
 	if(timer.pot_timer >= 2){	//1msごと 1sぶん格納できる
 		store_pot_data(flag.pot_store, &number_stored);
 		timer.pot_timer = 0;
@@ -607,6 +622,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//タイマー割�
 	flag.error = error_check(&error_number);
 
 	updata_ADval();
+
+	read_gyro_data();
+	read_accel_data();
+	updata_imu_data_lowpassed();
+
+
+	if(timer.imu_timer >= 2){
+		store_imu_data_2(flag.imu_store_2);
+		timer.imu_timer = 0;
+	}
 
 	choice_following_mode(flag.following_start);
 	sensor_following(flag.following);
@@ -636,6 +661,7 @@ void init(){
 	lcd_init();			//起動に時間がかかる
 	imu_check = IMU_init();
 	sd_mount_check = sd_mount();
+	flag.imu_store_2 = 1;
 
 	flag_reset();
 
@@ -1024,7 +1050,7 @@ short course_memory(char enable){
 }
 
 //************************************************************************/
-//* 役割　：　コース記憶に関するデータを配列にぶちこむ
+//* 役割　：　コース記憶に関するデータを配列にぶちこむ 距離バージョン
 //* 引数　：　char: enable(1) or reset(0)
 //* 戻り値：　short: array number
 //* 備考 :
@@ -1074,7 +1100,7 @@ void updata_imu_data_lowpassed(){
 //* 戻り値：　void:
 //* 備考 :
 //************************************************************************/
-float lowpass_filter_simple(int x, int x0, char r){
+float lowpass_filter_simple(float x, float x0, float r){
 
 	return ((r)*(x) + (1.0 - (r))* (x0));
 
@@ -1290,6 +1316,27 @@ void store_imu_data(char Flag){
 
 }
 
+//************************************************************************/
+//* 役割　：　imuデータを配列に格納する2
+//* 引数　：　void:
+//* 戻り値：　void:
+//* 備考 :
+//************************************************************************/
+void store_imu_data_2(char Flag){
+	static short access;
+
+	if(Flag){
+		radius_memory_2[access] = zg;
+		radius_memory_3[access] = zg_l;
+		access++;
+
+		if(access >= MEMORY_ARRAY_SIZE_2 - 1){
+			access = 0;
+			flag.imu_store_2 = 0;
+		}
+	}
+
+}
 //************************************************************************/
 //* 役割　：　imuデータを配列に格納する
 //* 引数　：　void:

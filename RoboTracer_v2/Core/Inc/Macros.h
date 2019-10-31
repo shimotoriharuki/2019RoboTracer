@@ -75,29 +75,35 @@
 #define TEST_SIZE 1
 
 #define COUNT_TO_RECORD 56.19556055 //[mm]
-#define R 0.8
+#define R 0.4
 
-#define MEMORY_ARRAY_SIZE_2 6000
+#define MEMORY_ARRAY_SIZE_2 1000
 
+//-----------------------------------------------------//
 //SD file name
-
 #define ENCORDER_LOG 0
-#define IMU_LOG 1
-#define POT_LOG 2
-#define LINE_SENSOR_LOG 3
+#define IMU_LOG1 1
+#define IMU_LOG2 2
+#define POT_LOG 3
+#define LINE_SENSOR_LOG 4
 
 #define FOLDER_0 '0'
 #define FOLDER_1 '1'
 #define FOLDER_2 '2'
+#define FOLDER_3 '3'
+
 
 #define ENCORDER_LOG_TXT "encorder_log.txt"
-#define IMU_LOG_TXT "imu_log.txt"
+#define IMU_LOG1_TXT "imu_log1.txt"
+#define IMU_LOG2_TXT "imu_log2.txt"
 #define POT_LOG_TXT "pot_log.txt"
 #define LINE_SENSOR_LOG_TXT "line_sensor_log.txt"
 
-//
-
-
 #define OVER_WRITE 0	//上書き
 #define ADD_WRITE 1		//追加書き
+
+//-----------------------------------------------------//
+
+
+
 

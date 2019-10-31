@@ -17,6 +17,7 @@ typedef struct {
 	char speed_ctrl;
 	char acc;
 	char imu_store;
+	char imu_store_2;
 	char pot_store;
 	char speed_updata;
 	char side;
@@ -148,8 +149,10 @@ int test_aaray[TEST_SIZE];
 char sd_mount_check;
 float xg_l, yg_l, zg_l;
 //short encorder_memory_2[MEMORY_ARRAY_SIZE_2];
-short radius_memory_2[MEMORY_ARRAY_SIZE_2];
-char fileName[][64] = {ENCORDER_LOG_TXT, IMU_LOG_TXT, POT_LOG_TXT};
+float radius_memory_2[MEMORY_ARRAY_SIZE_2];
+float radius_memory_3[MEMORY_ARRAY_SIZE_2];
+
+//char fileName[][64] = {ENCORDER_LOG_TXT, IMU_LOG_TXT, POT_LOG_TXT};
 
 #else
 /* 自動生成変数 (CubeMXから変更を加えた場合変える必要があるかも)-------------------------------------------------------------*/
@@ -238,7 +241,9 @@ extern char sd_mount_check;
 extern float xg_l, yg_l, zg_l;
 
 //extern short encorder_memory_2[MEMORY_ARRAY_SIZE_2];
-extern short radius_memory_2[MEMORY_ARRAY_SIZE_2];
-extern char fileName[3];
+extern float radius_memory_2[MEMORY_ARRAY_SIZE_2];
+extern float radius_memory_3[MEMORY_ARRAY_SIZE_2];
+
+//extern char fileName[3];
 
 #endif

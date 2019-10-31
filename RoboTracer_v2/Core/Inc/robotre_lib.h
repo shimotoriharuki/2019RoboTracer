@@ -59,6 +59,7 @@ float getRadius(void);
 short course_memory(char);
 void updata_robot_speed(char);
 void store_imu_data(char);
+void store_imu_data_2(char);
 void store_pot_data(char, short *);
 float getRadius_imu(void);
 void lowpass_filter(int *, float *, short, float, float, float);
@@ -71,7 +72,7 @@ char encorder_correction(short, int);
 
 short course_memory_const_distance(char enable);
 void updata_imu_data_lowpassed(void);
-float lowpass_filter_simple(int, int, char);
+float lowpass_filter_simple(float, float, float);
 
 
 

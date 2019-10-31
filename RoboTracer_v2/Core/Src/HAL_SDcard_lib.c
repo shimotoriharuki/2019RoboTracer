@@ -7,12 +7,12 @@
 
 #include <stdio.h>
 #include "fatfs.h"
+#include "fatfs_sd.h"
 
 #include "Macros.h"
-#include "HAL_SDcard_lib.h"
 #include "string.h"
 
-#include "fatfs_sd.h"
+#include "HAL_SDcard_lib.h"
 
 
 #define BUFF_SIZE 256
@@ -31,45 +31,22 @@ char filepath[256];
 char dirpath[256];
 
 
-
 //************************************************************************/
 //* 役割　：　SDに書き込む
 //* 引数　：　char, short, float: ファイル選択, 配列の数, データ
 //* 戻り値：　char: 状態チェック	0(SDカードがない) or 1(成功) or 2(マウント失敗)
 //* 備考 : なし
 //************************************************************************/
-FRESULT sd_write(char f_sel, short size, float *data, char state){
-	FRESULT ret = 0;
-
-	if(state == OVER_WRITE) f_unlink("/encorder_log.txt\0");
-
-	select_open_filename(f_sel);	//書き込むファイルを選択
-
-	for(short i = 0 ; i < size; i++){
-		snprintf(buffer, BUFF_SIZE, "%f\n", *(data + i));	//floatをstringに変換
-
-		f_lseek(&fil, f_size(&fil));	//ファイルの最後に移動
-		f_write(&fil, buffer, strlen(buffer), &bw);	//書き込む
-
-		bufclear();	//書き込み用のバッファをクリア
-	}
-	f_close(&fil);	//ファイル閉じる
-
-	return ret;
-}
-
-//************************************************************************/
-//* 役割　：　SDに書き込む_2
-//* 引数　：　char, short, float: ファイル選択, 配列の数, データ
-//* 戻り値：　char: 状態チェック	0(SDカードがない) or 1(成功) or 2(マウント失敗)
-//* 備考 : なし
-//************************************************************************/
-FRESULT sd_write_2(char folder_number_char, char file_number, short size, float *data, char state){
+FRESULT sd_write(char folder_number_char, char file_number, short size, float *data, char state){
 	FRESULT ret = 0;
 
 	create_path(folder_number_char, file_number);
 
-	if(state == OVER_WRITE) f_unlink(filepath);	//一回消す
+	if(state == OVER_WRITE){
+		f_chdir(dirpath);
+		f_unlink(filepath);	//一回消す
+		f_chdir("..");
+	}
 
 	select_open_filename_2();	//書き込むファイルを選択
 
@@ -92,34 +69,22 @@ FRESULT sd_write_2(char folder_number_char, char file_number, short size, float 
 //* 戻り値：　char: 状態チェック	0(Sdカードがない) or 1(成功) or 2(マウント失敗)
 //* 備考 : なし
 //************************************************************************/
-FRESULT sd_read(char f_sel, short size, float *data){
+FRESULT sd_read(char folder_number_char, char file_number, short size, float *data){
 	FRESULT ret = 0;
-	float test = 0;
 	short i = 0;
 
+	create_path(folder_number_char, file_number);
+	select_open_filename_2();	//書き込むファイルを選択
+
+	while(f_gets(buffer, sizeof(buffer), &fil) != NULL){
+		sscanf(buffer, "%f", data + i);
+		i++;
+		if(i >= size) i = size - 1;
+
+	}
 
 
-	select_open_filename(f_sel);	//書き込むファイルを選択
-
-	//for(short i = 0 ; i < size; i++){
-		while(f_gets(buffer, sizeof(buffer), &fil) != NULL){
-			sscanf(buffer, "%f", data + i);
-			i++;
-			if(i >= size) i = size - 1;
-			//printf("%f\r\n", test);
-		}
-
-
-		bufclear();	//書き込み用のバッファをクリア
-		//printf("%f\r\n", test);
-
-
-		//sscanf(buffer, "%f", (data + i));
-
-		//printf("%f\r\n", test);
-
-
-	//}
+	bufclear();	//書き込み用のバッファをクリア
 
 	f_close(&fil);	//ファイル閉じる
 
@@ -170,8 +135,11 @@ void create_path(char folder_number_char, char file_number){
 		case ENCORDER_LOG:
 			strcpy(filepath, ENCORDER_LOG_TXT);
 		break;
-		case IMU_LOG:
-			strcpy(filepath, IMU_LOG_TXT);
+		case IMU_LOG1:
+			strcpy(filepath, IMU_LOG1_TXT);
+		break;
+		case IMU_LOG2:
+			strcpy(filepath, IMU_LOG2_TXT);
 		break;
 
 		case POT_LOG:
