@@ -30,7 +30,7 @@ void angle_ctrl(char, short);
 void updata_curve_val(char, short, float, float *, float *);
 void updata_straight_val(char, float, float *, float *, float, float, float);
 void Line_trace(char);
-void speed_ctrl(float, float, float, float *);
+void speed_ctrl(char, float, float, float, float *);
 void trace(char, float, float, float, float *);
 void debug_pcprintf(void);
 void init(void);
@@ -73,6 +73,8 @@ char encorder_correction(short, int);
 short course_memory_const_distance(char enable);
 void updata_imu_data_lowpassed(void);
 float lowpass_filter_simple(float, float, float);
+
+void calc_feed_forward(float, float, float, float *, float *);
 
 
 

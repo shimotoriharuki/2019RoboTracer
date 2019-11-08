@@ -29,7 +29,7 @@
 //************************************************************************/
 char debug_lcd(){
 	signed char ready = 0;
-	//static short tim = 0;
+	static short tim = 0;
 
 	if(timer.lcd > LCD_WAIT){
 		timer.lcd = 0;
@@ -53,10 +53,9 @@ char debug_lcd(){
 				LED('B');
 
 				if(SW(1)){//
-					sd_write(FOLDER_0, IMU_LOG1, MEMORY_ARRAY_SIZE_2, radius_memory_2, OVER_WRITE);
-					sd_write(FOLDER_0, IMU_LOG2, MEMORY_ARRAY_SIZE_2, radius_memory_3, OVER_WRITE);
+					//sd_write(FOLDER_0, IMU_LOG1, MEMORY_ARRAY_SIZE_2, radius_memory_2, OVER_WRITE);
+					//sd_write(FOLDER_0, IMU_LOG2, MEMORY_ARRAY_SIZE_2, radius_memory_3, OVER_WRITE);
 					printf("sd_write\r\n");
-					flag.imu_store_2 = 100;
 
 				}
 
@@ -100,13 +99,19 @@ char debug_lcd(){
 			*/
 			//--------------------------------------------------------
 			case 2:
-
-				lcd_clear();
+				/*				lcd_clear();
 				lcd_locate(0,0);
 				lcd_printf("SL: %d", SideL);
 				lcd_locate(0,1);
 				lcd_printf("SR: %d", SideR);
-
+				*/
+				/*
+				lcd_clear();
+				lcd_locate(0,0);
+				lcd_printf("%d", timer.check_timer);
+				lcd_locate(0,1);
+				lcd_printf("        ");
+				*/
 				/*
 				lcd_clear();
 				lcd_locate(0,0);
@@ -114,6 +119,45 @@ char debug_lcd(){
 				lcd_locate(0,1);
 				lcd_printf("DL:%dDR:%d", getDigital('L'), getDigital('R'));
 				*/
+
+				lcd_clear();
+				lcd_locate(0,0);
+				lcd_printf("FF");
+				lcd_locate(0,1);
+				lcd_printf("%f", ff_duty_L);
+
+				//ff_accele_L = 10;
+				//ff_accele_R = 10;
+
+				if(SW(1)){
+					HAL_Delay(500);
+					flag.imu_store_2 = 1;
+					maxon_ctrl(robot_speed, robot_speed);
+					flag.speed_ctrl_enable = 1;
+					timer.my_timer2 = 0;
+					speed_L = 3000*1.1;
+					speed_R = 3000*1.1;
+					flag.acc = 1;
+				}
+				else if(SW(3)){
+					LED('N');
+					sd_write_array(FOLDER_4, "velo_log_L_ff_afr.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					sd_write_array(FOLDER_4, "velo_log_R_ff_afr.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
+					printf("sd_write\r\n");
+				}
+
+				if(timer.my_timer2 >= 900){
+					speed_L = speed_R = 0;
+				}
+
+				if((total_encL + total_encR) / 2 >= 60000 || flag.imu_store_2 == 0){
+					maxon_ctrl(0, 0);
+					speed_L = speed_R = 0;
+					flag.speed_ctrl_enable = 0;
+					total_encL = total_encR = 0;
+					flag.imu_store_2 = 0;
+					flag.acc = 0;
+				}
 
 				LED('G');
 			break;
@@ -138,9 +182,48 @@ char debug_lcd(){
 
 				lcd_clear();
 				lcd_locate(0,0);
-				lcd_printf("%d", timer.check_timer);
+				lcd_printf("imu test");
 				lcd_locate(0,1);
-				lcd_printf("        ");
+				lcd_printf("%d", tim);
+
+				if(SW(1)){
+
+					HAL_Delay(500);
+					robot_speed = 300;
+					timer.my_timer2 = 0;
+					flag.imu_store_2 = 1;
+					flag.speed_ctrl_enable = 1;
+				}
+				else if(SW(2)){
+					robot_speed = 0;
+					flag.imu_store_2 = 0;
+				}
+				else if(SW(3)){
+					LED('N');
+					sd_write_array(FOLDER_2, "velo_log_L_ffhenka.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					sd_write_array(FOLDER_2, "velo_log_R_ffhenka.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
+
+					printf("sd_write\r\n");
+
+				}
+
+
+				if(total_encL > ONE_ROTATION_COUNT || total_encR > ONE_ROTATION_COUNT){
+					robot_speed = 0;
+					tim = timer.my_timer2;
+					total_encL = total_encR = 0;
+					flag.imu_store_2 = 0;
+					flag.speed_ctrl_enable = 0;
+
+				}
+				else if(total_encL > ONE_ROTATION_COUNT/2 || total_encR > ONE_ROTATION_COUNT/2){
+					robot_speed = 200;
+				}
+
+				else if(total_encL > ONE_ROTATION_COUNT/4 || total_encR > ONE_ROTATION_COUNT/4){
+					robot_speed = 500;
+				}
+
 				LED('Y');
 
 				/*
@@ -325,6 +408,7 @@ char debug_lcd(){
 		}
 	}
 	return ready;
+
 }
 
 /************************************************************************/
@@ -361,6 +445,7 @@ char running_processing(){
 	static char side_off_cnt = 0;
 	//static char a = 0, b = 0;
 
+	robot_speed = target_robot_speed;
 	/*-----------------リセット-------------------*/
 	if(flag.runnning_reset == 1){
 		start_goal_cnt = 0;
@@ -612,7 +697,7 @@ char goal_area_processing(char reset){
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//タイマー割り込みで呼び出される
 
 	increment_mytimer();
-	accelerator(flag.acc, increment_acc);
+	//accelerator(flag.acc, increment_acc);
 
 	if(timer.pot_timer >= 2){	//1msごと 1sぶん格納できる
 		store_pot_data(flag.pot_store, &number_stored);
@@ -627,19 +712,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//タイマー割�
 	read_accel_data();
 	updata_imu_data_lowpassed();
 
+/*
+	if(timer.imu_timer >= 100 && flag.sd_record == 1){
+		float now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();			//[mm/s]
+		float now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+		sd_write_array(FOLDER_3, "run_veloL.txt", 1, &now_speed_L, ADD_WRITE);
+		sd_write_array(FOLDER_3, "run_veloR.txt", 1, &now_speed_R, ADD_WRITE);
 
-	if(timer.imu_timer >= 2){
-		store_imu_data_2(flag.imu_store_2);
 		timer.imu_timer = 0;
 	}
+*/
+	store_imu_data_2(flag.imu_store_2);
 
 	choice_following_mode(flag.following_start);
 	sensor_following(flag.following);
 	angle_ctrl(flag.angle, 0);
 
+	//calc_feed_forward(ff_accele_L, ff_accele_R, 0, &ff_duty_L, &ff_duty_R);
 	Line_trace(flag.line_trace);
 
-	//speed_ctrl(robot_speed, robot_speed);	//普通は消す
+	//speed_ctrl(flag.speed_ctrl_enable, speed_L, speed_R, robot_speed, &speed_val);//普通は消す
 
 	hand_push_trace(flag.hand_push);
 
@@ -661,7 +753,7 @@ void init(){
 	lcd_init();			//起動に時間がかかる
 	imu_check = IMU_init();
 	sd_mount_check = sd_mount();
-	flag.imu_store_2 = 1;
+	//flag.imu_store_2 = 1;
 
 	flag_reset();
 
@@ -713,6 +805,7 @@ void flag_reset(){
 	flag.error_check_enable = 1;
 	flag.acc = 0;
 	//total_encL = total_encR = 0;
+	flag.sd_record  = 0;
 }
 
 
@@ -725,13 +818,15 @@ void flag_reset(){
 void flag_set(){
 	flag.following_start = 1;
 	flag.line_trace = 1;
-	flag.curve = 0;
+	flag.curve = 1;
 	flag.straight = 1;
 	flag.curve_to_straight = 0;
 	flag.acc = 1;
 	flag.pot_store = 1;
 	flag.trace = 1;
 	flag.enc_memory_reset = 1;
+	flag.speed_ctrl_enable = 1;
+	flag.sd_record  = 1;
 
 }
 
@@ -1082,15 +1177,22 @@ short course_memory_const_distance(char enable){
 //* 備考 :
 //************************************************************************/
 void updata_imu_data_lowpassed(){
+
 	static float pre_xg = 0, pre_yg = 0, pre_zg = 0;
 
-	xg_l = lowpass_filter_simple(xg, pre_xg, R);
-	yg_l = lowpass_filter_simple(yg, pre_yg, R);
-	zg_l = lowpass_filter_simple(zg, pre_zg, R);
+	omega_x = (xg / 16.4) * PI / 180;
+	omega_y = (yg / 16.4) * PI / 180;
+	omega_z = (zg / 16.4) * PI / 180;
 
-	pre_xg = xg_l;
-	pre_yg = yg_l;
-	pre_zg = zg_l;
+	omega_x_l = lowpass_filter_simple(omega_x, pre_xg, R);
+	omega_y_l = lowpass_filter_simple(omega_y, pre_yg, R);
+	omega_z_l = lowpass_filter_simple(omega_z, pre_zg, R);
+
+
+
+	pre_xg = omega_x_l;
+	pre_yg = omega_y_l;
+	pre_zg = omega_z_l;
 
 }
 
@@ -1324,10 +1426,16 @@ void store_imu_data(char Flag){
 //************************************************************************/
 void store_imu_data_2(char Flag){
 	static short access;
+	float now_speed_L = 0, now_speed_R = 0, omega = 0, velo = 0;
 
 	if(Flag){
-		radius_memory_2[access] = zg;
-		radius_memory_3[access] = zg_l;
+		now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();			//[mm/s]
+		now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+		omega = now_speed_R / (TRED/2);
+		velo = (now_speed_L + now_speed_R) / 2;
+		various_memory1[access] = now_speed_L;
+		various_memory2[access] = now_speed_R;
+		radius_memory_3[access] = omega_z_l;
 		access++;
 
 		if(access >= MEMORY_ARRAY_SIZE_2 - 1){
@@ -1461,7 +1569,7 @@ void choice_following_mode(char Flag){
 		}
 
 		/*--------------------直線、カーブ選択------------------*/
-		flag.curve = 0;
+		flag.curve = 1;
 		flag.straight = 1;
 
 		/*--------------------直線、カーブ分岐------------------*/
@@ -1758,10 +1866,17 @@ void updata_curve_val(char Flag, short ref, float _robot_speed, float *p_def_spe
 	float radius = 0;
 
 	if(Flag){
-		radius = ROTATION_POINT_FROM_AXEL / tan(ref * RAD_PER_AD);
+
+		if(ref != 0) radius = ROTATION_POINT_FROM_AXEL / tan(ref * RAD_PER_AD);
+		else radius = 99999999;
 
 		*p_def_speedL = _robot_speed * ((radius + (TRED / 2)) / radius);
 		*p_def_speedR = _robot_speed * ((radius - (TRED / 2)) / radius);
+
+		//*p_def_speedL = 500.;
+		//*p_def_speedR = 500.;
+
+
 
 		/*
 		if(ref < 0){
@@ -1852,15 +1967,16 @@ void Line_trace(char Flag){
 	float input_L = 0, input_R = 0;
 
 	if(Flag){
-		//updata_curve_val(flag.curve, Def_ref, robot_speed, &speed_L, &speed_R);	//カーブ
+		updata_curve_val(flag.curve, Def_ref, robot_speed, &speed_L, &speed_R);	//カーブ
 
-		updata_straight_val(flag.straight, robot_speed, &speed_L, &speed_R, gain.kp, gain.ki, gain.kd);			//直線
+		//updata_straight_val(flag.straight, robot_speed, &speed_L, &speed_R, gain.kp, gain.ki, gain.kd);			//直線
 		//trace(flag.trace, gain.kp, gain.ki, gain.kd, &trace_val);
+		//printf("%f\r\n", *p_def_speedL);
 
-		speed_ctrl(speed_L, speed_R, robot_speed, &speed_val);							//速度制御する
+		speed_ctrl(flag.speed_ctrl_enable, speed_L, speed_R, robot_speed, &speed_val);							//速度制御する
 
-		input_L = -trace_val + speed_val;
-		input_R = trace_val + speed_val;
+		//input_L = -trace_val + speed_val;
+		//input_R = trace_val + speed_val;
 
 		//maxon_ctrl(input_L, input_R);
 	}
@@ -1901,49 +2017,179 @@ void hand_push_trace(char flag){
 //* 戻り値：　void:
 //* 備考 : なし
 //************************************************************************/
-void speed_ctrl(float targetL, float targetR, float target, float *val){
+void speed_ctrl(char enable, float targetL, float targetR, float target, float *val){
+	#define I_LIMIT 2000
+
 	float input_L = 0, input_R = 0, input = 0;
-	float kp = 0.624, ki = 160;	//beforer float kp = 0.78, ki = 160;
+	float kp = 1, ki = 150, kd = 0;	// beforer float kp = 0.624, ki = 160 float kp = 0.9, ki = 9;float kp = 0.5, ki = 40, kd = 0.00010;
 	float p_L = 0, p_R = 0, p = 0;
 	static float i_L = 0, i_R = 0, i = 0;
+	float d_L = 0, d_R = 0, d = 0;
+
 	float now_speed_L = 0, now_speed_R = 0;
 	float devi_L = 0, devi_R = 0, devi = 0;
+	static float pre_devi_L = 0, pre_devi_R = 0, pre_devi = 0;
 	float speed = 0;
+	static short cntL, cntR;
 
-	now_speed_L = getEncorder_L() * MM_PER_PULS * 2000;			//[mm/s]
-	now_speed_R = getEncorder_R() * MM_PER_PULS * 2000; 		//[mm/s]
+	static float pre_speed_L, pre_speed_R;
 
-	speed = (now_speed_L + now_speed_R) / 2;
+	if(enable){
+		now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();		//[mm/s]
+		now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
 
-	devi_L = targetL - now_speed_L;
-	p_L = devi_L * kp;
-	i_L += devi_L * DELTA_T * ki;
+//------------------------FF--------------------------//
 
-	devi_R = targetR - now_speed_R;
-	p_R = devi_R * kp;
-	i_R += devi_R * DELTA_T * ki;
+		if(now_speed_L >= targetL - 200 && now_speed_L <= targetL + 200){//目標に近づいたら
+			cntL++;
+		}
+		else{
+			cntL = 0;
+		}
+
+		if(cntL >= 10){
+			ff_accele_L = 0;
+			i_L = 0;
+			cntL = 0;
+		}
+		else if(fabs(pre_speed_L - targetL) > 500){
+			if(now_speed_L > targetL){	//目標値より高い場合
+				ff_accele_L = -10;
+			}
+			else if(now_speed_L < targetL) {//目標値より低い場合
+				ff_accele_L = 10;
+			}
+		}
+
+		if(now_speed_R >= targetR - 200 && now_speed_R <= targetR + 200){
+			cntR++;
+		}
+		else{
+			cntR = 0;
+		}
+
+		if(cntR >= 10){
+			ff_accele_R = 0;
+			i_R = 0;
+			cntR = 0;
+		}
+		else if(fabs(pre_speed_R - targetR) > 500){
+			if(now_speed_R > targetR){	//目標値より高い場合
+				ff_accele_R = -10;
+			}
+			else if(now_speed_R < targetR) {//目標値より低い場合
+				ff_accele_R = 10;
+			}
+		}
+
+		pre_speed_L = targetL;
+		pre_speed_R = targetR;
+
+		calc_feed_forward(ff_accele_L, ff_accele_R, 0, &ff_duty_L, &ff_duty_R);
+//--------------------------------------------------//
+
+		speed = (now_speed_L + now_speed_R) / 2;
+
+		devi_L = targetL - now_speed_L;
+		p_L = devi_L * kp;
+		i_L += devi_L * DELTA_T * ki;
+		///d_L = kd * (devi_L - pre_devi_L) / DELTA_T;
+
+		devi_R = targetR - now_speed_R;
+		p_R = devi_R * kp;
+		i_R += devi_R * DELTA_T * ki;
+		//d_R = kd * (devi_R - pre_devi_R) / DELTA_T;
 
 
-	devi = target - speed;
-	p = devi * kp;
-	i += devi * DELTA_T * ki;
+		devi = target - speed;
+		p = devi * kp;
+		i += devi * DELTA_T * ki;
+		//d = kd * (devi - pre_devi) / DELTA_T;
 
-	if(i_R > 500)	i_R = 500;
-	else if(i_R < -500)	i_R = -500;
-	if(i_L > 500)	i_L = 500;
-	else if(i_L < -500)	i_L = -500;
 
-	if(i > 500)	i = 500;
-	else if(i < -500)	i = -500;
+		if(i_R > I_LIMIT)	i_R = I_LIMIT;
+		else if(i_R < -I_LIMIT)	i_R = -I_LIMIT;
+		if(i_L > I_LIMIT)	i_L = I_LIMIT;
+		else if(i_L < -I_LIMIT)	i_L = -I_LIMIT;
 
-	input_L = p_L + i_L;
-	input_R = p_R + i_R;
-	*val = p + i;
+		if(i > I_LIMIT)	i = I_LIMIT;
+		else if(i < -I_LIMIT)	i = -I_LIMIT;
 
-	maxon_ctrl(input_L, input_R);
-	//maxon_ctrl(input, input);
+
+		input_L = ((p_L + i_L) + ff_duty_L) * 1.1475;
+		input_R = ((p_R + i_R) + ff_duty_R) * 1.1475;
+		//input_L = (p_L + i_L);
+		//input_R = (p_R + i_R);
+		//input_L = ff_duty_L;
+		//input_R = ff_duty_R;
+		*val = p + i ;
+
+		pre_devi_L = devi_L;
+		pre_devi_R = devi_R;
+		pre_devi = devi;
+
+		maxon_ctrl(input_L, input_R);
+		//maxon_ctrl(input, input);
+	}
 }
 
+/************************************************************************/
+//* 役割　：　速度フィードフォワード値計算
+//* 引数　：　float:
+//* 戻り値：　void:
+//* 備考 : なし
+//************************************************************************/
+void calc_feed_forward(float acc_L, float acc_R, float velo, float * duty_L, float * duty_R){
+	float T_tire_L = 0, T_tire_R = 0;
+	float T_motor_L = 0, T_motor_R = 0;
+	float I_L = 0, I_R = 0;
+	float V_velo_L = 0, V_velo_R = 0;
+	float V_acc_L = 0, V_acc_R = 0;
+	float Vr_L = 0, Vr_R = 0;
+	float duty_acc_L = 0, duty_velo_L = 0, duty_acc_R = 0, duty_velo_R = 0;
+	float n_target = 0;
+	float n_now_L = 0, n_now_R = 0;
+
+	//#define ACC 14
+	//#define VELO 1
+
+	T_tire_L = R_TIRE * (MACHINE_WEIGHT * acc_L) / 2;	//[Nm]
+	T_tire_R = R_TIRE * (MACHINE_WEIGHT * acc_R) / 2;	//[Nm]
+	T_motor_L = T_tire_L / GIRE_RATIO;
+	T_motor_R = T_tire_R / GIRE_RATIO;
+
+	I_L = T_motor_L / KM_L;
+	I_R = T_motor_R / KM_R;
+
+	n_now_L = 60 * getEncorder_L() / 2.048;	//rpm
+	n_now_R = 60 * getEncorder_R() / 2.048;	//rpm
+
+	Vr_L = Ke_L * n_now_L;
+	Vr_R = Ke_L * n_now_R;
+
+	V_acc_L = MOTOR_RESISTANCE * I_L + Vr_L;
+	V_acc_R = MOTOR_RESISTANCE * I_R + Vr_R;
+
+	duty_acc_L = MAX_DUTY * (V_acc_L / INPUT_VOLTAGE);
+	duty_acc_R = MAX_DUTY * (V_acc_R / INPUT_VOLTAGE);
+
+
+	//---velo--//
+	n_target =(velo / WHEEL_D * PI) * 60;	//rpm
+
+
+	n_target *= GIRE_RATIO;
+
+	V_velo_L = n_target / KE_L;
+	V_velo_R = n_target / KE_R;
+
+	duty_velo_L = MAX_DUTY * (V_velo_L / INPUT_VOLTAGE);
+	duty_velo_R = MAX_DUTY * (V_velo_R / INPUT_VOLTAGE);
+
+	*duty_L = duty_acc_L;
+	*duty_R = duty_acc_R;
+
+}
 /************************************************************************/
 //* 役割　：　加速させる
 //* 引数　：　void:
@@ -1951,29 +2197,64 @@ void speed_ctrl(float targetL, float targetR, float target, float *val){
 //* 備考 : なし
 //************************************************************************/
 void accelerator(char Flag, float accele){
-	//static float pre_speed = 0;
-	//static signed char sign;
-/*
-	if(pre_speed != target_robot_speed){
-		if(target_robot_speed > pre_speed)	sign = 1;
-		else if(target_robot_speed < pre_speed) sign = 2;
-		//else sign = 0;
 
-		pre_speed = target_robot_speed;
-	}
-*/
+#define OFFSET 500	//[mm/s]
 	if(Flag){
-		/*
-		if(sign == 1 && (robot_speed < target_robot_speed)){
-			robot_speed += accele;
+		float now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();			//[mm/s]
+		float now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+		//static float pre_robot_speed = 0;
 
-			if(robot_speed >= target_robot_speed){
-				robot_speed = target_robot_speed;
-				sign = 0;
+		if(fabs(now_speed_L - speed_L) > 500){	//目標速度と現在の速度の差がある程度あったら
+			if(now_speed_L > speed_L){	//目標値より高い場合
+				ff_accele_L = -10;
+			}
+			else if(now_speed_L < speed_L) {//目標値より低い場合
+				ff_accele_L = 10;
 			}
 		}
+		else{
+			ff_accele_L = 0;
+		}
+
+		if(fabs(now_speed_R - speed_R) > 500){	//目標速度と現在の速度の差がある程度あったら
+			if(now_speed_R > speed_R){	//目標値より高い場合
+				ff_accele_R = -10;
+			}
+			else if(now_speed_R < speed_R) {//目標値より低い場合
+				ff_accele_R = 10;
+			}
+		}
+		else{
+			ff_accele_R = 0;
+		}
+
+		//pre_robot_speed = robot_speed;
+		/*
+		if(robot_speed + OFFSET > now_speed_L && robot_speed - OFFSET < now_speed_L){	//目標値のとき
+			ff_accele_L = 0;
+		}
+		else if(robot_speed + OFFSET < now_speed_L){	//目標値より高い場合
+			ff_accele_L = -10;
+		}
+		else if(robot_speed - OFFSET > now_speed_L) {//目標値より低い場合
+			ff_accele_L = 10;
+		}
+
+		if(robot_speed + OFFSET > now_speed_R && robot_speed - OFFSET < now_speed_R){	//目標値のとき
+			ff_accele_R = 0;
+		}
+		else if(robot_speed + OFFSET < now_speed_R){	//目標値より高い場合
+			ff_accele_R = -10;
+		}
+		else if(robot_speed - OFFSET > now_speed_R) {//目標値より低い場合
+			ff_accele_R = 10;
+		}
 		*/
-		//else if(sign == 2){
+		//ff_accele_R = 0;
+		//ff_accele_L = 0;
+		//robot_speed = target_robot_speed;
+
+		/*
 		if(robot_speed > target_robot_speed){
 			robot_speed -= accele;
 			if(robot_speed <= target_robot_speed) robot_speed = target_robot_speed ;
@@ -1984,11 +2265,9 @@ void accelerator(char Flag, float accele){
 		}
 		else {
 			robot_speed = target_robot_speed;
-			//sign = 0;
 		}
+		*/
 
-
-		//else if(target_robot_speed == 0) robot_speed = 0;
 	}
 
 }

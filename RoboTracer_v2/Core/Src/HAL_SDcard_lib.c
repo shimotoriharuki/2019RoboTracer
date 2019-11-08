@@ -30,51 +30,73 @@ uint32_t total, free_space;
 char filepath[256];
 char dirpath[256];
 
-
 //************************************************************************/
-//* 役割　：　SDに書き込む
-//* 引数　：　char, short, float: ファイル選択, 配列の数, データ
-//* 戻り値：　char: 状態チェック	0(SDカードがない) or 1(成功) or 2(マウント失敗)
+//* 役割　：　fopenする
+//* 引数　：　char, float *: short　: フォルダ名、ファイル名
+//* 戻り値：　FRESULT:
 //* 備考 : なし
 //************************************************************************/
-FRESULT sd_write(char folder_number_char, char file_number, short size, float *data, char state){
+FRESULT user_fopen(char *p_folder_name, char *p_file_name){
+
 	FRESULT ret = 0;
 
-	create_path(folder_number_char, file_number);
+	create_path(p_folder_name, p_file_name);
 
-	if(state == OVER_WRITE){
-		f_chdir(dirpath);
-		f_unlink(filepath);	//一回消す
-		f_chdir("..");
-	}
-
-	select_open_filename_2();	//書き込むファイルを選択
-
-	for(short i = 0 ; i < size; i++){
-		snprintf(buffer, BUFF_SIZE, "%f\n", *(data + i));	//floatをstringに変換
-
-		f_lseek(&fil, f_size(&fil));	//ファイルの最後に移動
-		f_write(&fil, buffer, strlen(buffer), &bw);	//書き込む
-
-		bufclear();	//書き込み用のバッファをクリア
-	}
-	f_close(&fil);	//ファイル閉じる
+	fopen_folder_and_file();	//書き込むファイルを選択
 
 	return ret;
 }
 
 //************************************************************************/
-//* 役割　：　SDから読み込む
-//* 引数　：　char, float *, short　: ファイル選択, データ, データサイズ
-//* 戻り値：　char: 状態チェック	0(Sdカードがない) or 1(成功) or 2(マウント失敗)
+//* 役割　：　fcloseする
+//* 引数　：　void
+//* 戻り値：　FRESULT:
 //* 備考 : なし
 //************************************************************************/
-FRESULT sd_read(char folder_number_char, char file_number, short size, float *data){
+FRESULT user_fclose(){
+	FRESULT ret = 0;
+
+	f_close(&fil);	//ファイル閉じる
+
+	return ret;
+}
+
+
+//************************************************************************/
+//* 役割　：　SDに書き込む
+//* 引数　：　short, float *, char : 変数の数、データのポインタ、追加か上書きか
+//* 戻り値：　FRESULT:
+//* 備考 : なし
+//************************************************************************/
+FRESULT sd_write(short size, float *data, char state){
+	FRESULT ret = 0;
+
+	for(short i = 0 ; i < size; i++){
+		snprintf(buffer, BUFF_SIZE, "%f\n", *(data + i));	//floatをstringに変換
+
+		if(state == ADD_WRITE){
+			f_lseek(&fil, f_size(&fil));	//ファイルの最後に移動
+		}
+		else{
+			f_lseek(&fil, 0);	//ファイルの最初に移動
+		}
+
+		f_write(&fil, buffer, strlen(buffer), &bw);	//書き込む
+
+		bufclear();	//書き込み用のバッファをクリア
+	}
+	return ret;
+}
+
+//************************************************************************/
+//* 役割　：　SDから読み込む
+//* 引数　：　short, float *　:変数の数、データのポインタ
+//* 戻り値：　FRESULT:
+//* 備考 : なし
+//************************************************************************/
+FRESULT sd_read(short size, float *data){
 	FRESULT ret = 0;
 	short i = 0;
-
-	create_path(folder_number_char, file_number);
-	select_open_filename_2();	//書き込むファイルを選択
 
 	while(f_gets(buffer, sizeof(buffer), &fil) != NULL){
 		sscanf(buffer, "%f", data + i);
@@ -83,6 +105,70 @@ FRESULT sd_read(char folder_number_char, char file_number, short size, float *da
 
 	}
 
+	bufclear();	//書き込み用のバッファをクリア
+
+	return ret;
+}
+
+//************************************************************************/
+//* 役割　：　SDに書き込む
+//* 引数　：　char *, char *, short, float *, char: フォルダ名、ファイル名、変数の数、データのポインタ、追加か上書きか
+//* 戻り値：　FRESULT:
+//* 備考 : なし
+//************************************************************************/
+FRESULT sd_write_array(char *p_folder_name, char *p_file_name, short size, float *data, char state){
+	FRESULT ret = 0;
+
+	create_path(p_folder_name, p_file_name);
+
+	if(state == OVER_WRITE){
+		f_chdir(dirpath);
+		f_unlink(filepath);	//一回消す
+		f_chdir("..");
+	}
+
+	fopen_folder_and_file();	//書き込むファイルを選択
+
+	for(short i = 0 ; i < size; i++){
+		snprintf(buffer, BUFF_SIZE, "%f\n", *(data + i));	//floatをstringに変換
+/*
+		if(state == ADD_WRITE){
+			f_lseek(&fil, f_size(&fil));	//ファイルの最後に移動
+		}
+		else{
+			f_lseek(&fil, 0);	//ファイルの最初に移動
+		}
+*/
+		f_lseek(&fil, f_size(&fil));	//ファイルの最後に移動
+		f_write(&fil, buffer, strlen(buffer), &bw);	//書き込む
+
+		bufclear();	//書き込み用のバッファをクリア
+	}
+
+	f_close(&fil);	//ファイル閉じる
+
+	return ret;
+}
+
+//************************************************************************/
+//* 役割　：　SDから読み込む
+//* 引数　：　char *, char *, short, float *: フォルダ名、ファイル名、変数の数、データのポインタ
+//* 戻り値：　FRESULT:
+//* 備考 : なし
+//************************************************************************/
+FRESULT sd_read_array(char *p_folder_name, char *p_file_name, short size, float *data){
+	FRESULT ret = 0;
+	short i = 0;
+
+	create_path(p_folder_name, p_file_name);
+	fopen_folder_and_file();	//書き込むファイルを選択
+
+	while(f_gets(buffer, sizeof(buffer), &fil) != NULL){
+		sscanf(buffer, "%f", data + i);
+		i++;
+		if(i >= size) i = size - 1;
+
+	}
 
 	bufclear();	//書き込み用のバッファをクリア
 
@@ -93,8 +179,8 @@ FRESULT sd_read(char folder_number_char, char file_number, short size, float *da
 
 //************************************************************************/
 //* 役割　：　SDカードをマウント
-//* 引数　：　char: ファイル選択
-//* 戻り値：　char: 状態チェック	0(マウント失敗) or 1(成功)
+//* 引数　：　void:
+//* 戻り値：　FRESULT:
 //* 備考 : なし
 //************************************************************************/
 FRESULT sd_mount(){
@@ -108,11 +194,11 @@ FRESULT sd_mount(){
 
 //************************************************************************/
 //* 役割　：　SDカードをアンマウント
-//* 引数　：　char: ファイル選択
-//* 戻り値：　char: 状態チェック	0(マウント失敗) or 1(成功)
+//* 引数　：　void:
+//* 戻り値：　FRESULT:
 //* 備考 : なし
 //************************************************************************/
-FRESULT sd_unmount(char f_sel){
+FRESULT sd_unmount(){
 	FRESULT ret = 0;
 
 	if(f_mount(NULL, "", 1) == FR_OK) ret = 1;
@@ -123,73 +209,25 @@ FRESULT sd_unmount(char f_sel){
 
 //************************************************************************/
 //* 役割　：　操作するパスの文字列を作る
-//* 引数　：　char, char: フォルダー選択, ファイル選択
+//* 引数　：　char, char: フォルダ名, ファイル名
 //* 戻り値：　void:
 //* 備考 : なし
 //************************************************************************/
-void create_path(char folder_number_char, char file_number){
+void create_path(char *p_folder_name, char *p_file_name){
 
-	sprintf(dirpath, "log_folder_%c.txt", folder_number_char);
+	sprintf(dirpath, "%s", p_folder_name);
 
-	switch (file_number){
-		case ENCORDER_LOG:
-			strcpy(filepath, ENCORDER_LOG_TXT);
-		break;
-		case IMU_LOG1:
-			strcpy(filepath, IMU_LOG1_TXT);
-		break;
-		case IMU_LOG2:
-			strcpy(filepath, IMU_LOG2_TXT);
-		break;
-
-		case POT_LOG:
-			strcpy(filepath, POT_LOG_TXT);
-		break;
-
-		case LINE_SENSOR_LOG:
-			strcpy(filepath, LINE_SENSOR_LOG_TXT);
-		break;
-
-	}
-
-}
-//************************************************************************/
-//* 役割　：　操作するファイルを選択する
-//* 引数　：　char: ファイル選択
-//* 戻り値：　char: 状態チェック	0(マウント失敗) or 1(成功)
-//* 備考 : なし
-//************************************************************************/
-void select_open_filename(char f_sel){
-/*
-	switch(f_sel){
-		case ENCORDER_LOG:
-			f_open(&fil, "encorder_log.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
-		break;
-
-		case IMU_LOG:
-			f_open(&fil, "imu_log.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
-		break;
-
-		case POT_LOG:
-			f_open(&fil, "pot_log.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
-		break;
-
-		case LINE_SENSOR_LOG:
-			f_open(&fil, "line_sensor_log.txt", FA_OPEN_ALWAYS | FA_READ | FA_WRITE);
-		break;
-
-	}
-*/
+	sprintf(filepath, "%s", p_file_name);
 
 }
 
 //************************************************************************/
-//* 役割　：　操作するファイルを選択する_2
+//* 役割　：　操作するファイルを選択する_
 //* 引数　：　char: ファイル選択
 //* 戻り値：　char: 状態チェック	0(マウント失敗) or 1(成功)
 //* 備考 : なし
 //************************************************************************/
-void select_open_filename_2(){	//mkdir
+void fopen_folder_and_file(){	//mkdir
 
 	f_mkdir(dirpath);
 
@@ -201,6 +239,7 @@ void select_open_filename_2(){	//mkdir
 
 
 }
+
 //************************************************************************/
 //* 役割　：　バッファをクリア
 //* 引数　：　void:

@@ -19,7 +19,7 @@ void read_gyro_data(void);
 void read_accel_data(void);
 
 /*
-Gyro		レンジ(dps)	スケールファクター(LSB/dps)　
+Gyro		レンジ(dps)	スケールファクター(LSB/dps)　dps = 生/スケールファクター
 					±250				131
 					±500				65.5
 					±1000				32.8

@@ -29,6 +29,8 @@ typedef struct {
 	char trace;
 	char retention_reset;
 	char updata_robot_speed_reset;
+	char speed_ctrl_enable;
+	char sd_record;
 }Flag;
 
 typedef struct{
@@ -151,6 +153,14 @@ float xg_l, yg_l, zg_l;
 //short encorder_memory_2[MEMORY_ARRAY_SIZE_2];
 float radius_memory_2[MEMORY_ARRAY_SIZE_2];
 float radius_memory_3[MEMORY_ARRAY_SIZE_2];
+float various_memory1[MEMORY_ARRAY_SIZE_2];
+float various_memory2[MEMORY_ARRAY_SIZE_2];
+
+float omega_x, omega_y, omega_z;
+float omega_x_l, omega_y_l, omega_z_l;
+
+float ff_accele_L, ff_accele_R;
+float ff_duty_L, ff_duty_R;
 
 //char fileName[][64] = {ENCORDER_LOG_TXT, IMU_LOG_TXT, POT_LOG_TXT};
 
@@ -243,6 +253,14 @@ extern float xg_l, yg_l, zg_l;
 //extern short encorder_memory_2[MEMORY_ARRAY_SIZE_2];
 extern float radius_memory_2[MEMORY_ARRAY_SIZE_2];
 extern float radius_memory_3[MEMORY_ARRAY_SIZE_2];
+extern float various_memory1[MEMORY_ARRAY_SIZE_2];
+extern float various_memory2[MEMORY_ARRAY_SIZE_2];
+
+extern float omega_x, omega_y, omega_z;
+extern float omega_x_l, omega_y_l, omega_z_l;
+
+extern float ff_accele_L, ff_accele_R;
+extern float ff_duty_L, ff_duty_R;
 
 //extern char fileName[3];
 

@@ -7,6 +7,7 @@
 
 //#define REVERCE_RUN	//逆走するときONにする
  
+#define PI 3.1415926535
  
 #define STOP_CNT 5000
 #define	MAXON_MAX_RATIO 1200
@@ -37,7 +38,7 @@
 #define INT_MIN -2147483648
 #define LONG_MAX 4294967295
 
-#define DELTA_T (float)0.0005
+#define DELTA_T (float)0.001
 #define LCD_WAIT 100
 #define DATA_SIZE1 7	//adの配列数
 #define DATA_SIZE2 3
@@ -59,45 +60,64 @@
 #define SAMPLERATE 500
 #define Q 1
 
-#define HIGH_SPEED 6000	//6000
-#define COMM_SPEED 2000	//2000
-#define LOW_SPEED 1450	//1450
+#define HIGH_SPEED 1000	//6000
+#define COMM_SPEED 800	//2000
+#define LOW_SPEED 1300	//1450
 
 #define HIGH_SPEED_2 6000	//6000
 #define COMM_SPEED_2 2000	//2000
 #define LOW_SPEED_2 1600	//1450
 
-#define ROTATION_POINT_FROM_AXEL 25
-#define TRED 112
+#define ROTATION_POINT_FROM_AXEL 39.5	//39.5
+#define TRED 112.	//[mm]112
 #define AD_RESOLUTION 2048 //-2048-2048
 #define DEG160_TO_RAD 2.792526803
 #define RAD_PER_AD (DEG160_TO_RAD / AD_RESOLUTION)
 #define TEST_SIZE 1
 
 #define COUNT_TO_RECORD 56.19556055 //[mm]
-#define R 0.4
+#define R 0.15
 
-#define MEMORY_ARRAY_SIZE_2 1000
+#define MEMORY_ARRAY_SIZE_2 1100
+
+#define MACHINE_WEIGHT 0.205	//[kg]
+#define R_TIRE 0.011	//[m]
+#define GIRE_RATIO 1.9355
+#define KM_L 0.002120	//[Nm/A]	//0.00352
+#define KE_L 2168		//[rpm/V]	2710 2168
+#define Ke_L (1/KE_L)	//[V/rpm]
+#define KM_R 0.002120	//[Nm/A]	//0.00352
+#define KE_R 2168		//[rpm/V]	2710 2168
+#define Ke_R (1/KE_R)	//[V/rpm]
+#define MOTOR_RESISTANCE 2.9	//[ohm]
+#define MAX_DUTY 1200	//V_MAX : 1200
+#define INPUT_VOLTAGE 8	//[V]
+#define WHEEL_D 0.22	//[m]
+
 
 //-----------------------------------------------------//
+//SD folder name
+#define FOLDER_0 "folder_0"
+#define FOLDER_1 "folder_1"
+#define FOLDER_2 "folder_2"
+#define FOLDER_3 "folder_3"
+#define FOLDER_4 "folder_4"
+#define FOLDER_TEST "folder_test"
+
 //SD file name
-#define ENCORDER_LOG 0
-#define IMU_LOG1 1
-#define IMU_LOG2 2
-#define POT_LOG 3
-#define LINE_SENSOR_LOG 4
-
-#define FOLDER_0 '0'
-#define FOLDER_1 '1'
-#define FOLDER_2 '2'
-#define FOLDER_3 '3'
-
-
 #define ENCORDER_LOG_TXT "encorder_log.txt"
 #define IMU_LOG1_TXT "imu_log1.txt"
 #define IMU_LOG2_TXT "imu_log2.txt"
 #define POT_LOG_TXT "pot_log.txt"
+#define VELO_LOG_TXT "velo_log1.txt"
 #define LINE_SENSOR_LOG_TXT "line_sensor_log.txt"
+#define OTHER1_TXT "other1.txt"
+#define OTHER2_TXT "other2.txt"
+#define OTHER3_TXT "other3.txt"
+#define OTHER4_TXT "other4.txt"
+#define OTHER5_TXT "other5.txt"
+#define OTHER6_TXT "other6.txt"
+
 
 #define OVER_WRITE 0	//上書き
 #define ADD_WRITE 1		//追加書き
