@@ -343,14 +343,18 @@ int main(void)
 					for(short i = 0; i < max_access; i++){
 						//printf("%d		%f		%d		%d		%d		%d\r\n", i, radius_memory[i], encorder_playback[i], encorder_memoryL[i], encorder_memoryR[i],  max_access);
 					}
-
+					LED('N');
+					sd_write_array(FOLDER_5, "now_speed_L.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					sd_write_array(FOLDER_5, "now_speed_R.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
+					sd_write_array(FOLDER_5, "target_speed_L.txt", MEMORY_ARRAY_SIZE_2, various_memory3, OVER_WRITE);
+					sd_write_array(FOLDER_5, "target_speed_R.txt", MEMORY_ARRAY_SIZE_2, various_memory4, OVER_WRITE);
 				}
 
 				if(SW(3)){
 					stage = 10;
 					break;
 				}
-
+				LED('C');
 			break;
 
 		}

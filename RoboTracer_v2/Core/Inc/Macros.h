@@ -68,8 +68,8 @@
 #define COMM_SPEED_2 2000	//2000
 #define LOW_SPEED_2 1600	//1450
 
-#define ROTATION_POINT_FROM_AXEL 39.5	//39.5
-#define TRED 112.	//[mm]112
+#define ROTATION_POINT_FROM_AXEL 39.5	//39.5 ~ 51.5 45.5よさげ 　33.5 だめ
+#define TRED 112.	//[mm]112 124
 #define AD_RESOLUTION 2048 //-2048-2048
 #define DEG160_TO_RAD 2.792526803
 #define RAD_PER_AD (DEG160_TO_RAD / AD_RESOLUTION)
@@ -91,7 +91,7 @@
 #define Ke_R (1/KE_R)	//[V/rpm]
 #define MOTOR_RESISTANCE 2.9	//[ohm]
 #define MAX_DUTY 1200	//V_MAX : 1200
-#define INPUT_VOLTAGE 8	//[V]
+#define INPUT_VOLTAGE 12	//[V]
 #define WHEEL_D 0.22	//[m]
 
 
@@ -102,6 +102,12 @@
 #define FOLDER_2 "folder_2"
 #define FOLDER_3 "folder_3"
 #define FOLDER_4 "folder_4"
+#define FOLDER_5 "folder_5"
+#define FOLDER_6 "folder_6"
+#define FOLDER_7 "folder_7"
+#define FOLDER_8 "folder_8"
+#define FOLDER_9 "folder_9"
+#define FOLDER_10 "folder_10"
 #define FOLDER_TEST "folder_test"
 
 //SD file name

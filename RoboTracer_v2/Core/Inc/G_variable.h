@@ -17,7 +17,7 @@ typedef struct {
 	char speed_ctrl;
 	char acc;
 	char imu_store;
-	char imu_store_2;
+	char log_store;
 	char pot_store;
 	char speed_updata;
 	char side;
@@ -155,6 +155,8 @@ float radius_memory_2[MEMORY_ARRAY_SIZE_2];
 float radius_memory_3[MEMORY_ARRAY_SIZE_2];
 float various_memory1[MEMORY_ARRAY_SIZE_2];
 float various_memory2[MEMORY_ARRAY_SIZE_2];
+float various_memory3[MEMORY_ARRAY_SIZE_2];
+float various_memory4[MEMORY_ARRAY_SIZE_2];
 
 float omega_x, omega_y, omega_z;
 float omega_x_l, omega_y_l, omega_z_l;
@@ -255,6 +257,8 @@ extern float radius_memory_2[MEMORY_ARRAY_SIZE_2];
 extern float radius_memory_3[MEMORY_ARRAY_SIZE_2];
 extern float various_memory1[MEMORY_ARRAY_SIZE_2];
 extern float various_memory2[MEMORY_ARRAY_SIZE_2];
+extern float various_memory3[MEMORY_ARRAY_SIZE_2];
+extern float various_memory4[MEMORY_ARRAY_SIZE_2];
 
 extern float omega_x, omega_y, omega_z;
 extern float omega_x_l, omega_y_l, omega_z_l;

@@ -131,12 +131,12 @@ char debug_lcd(){
 
 				if(SW(1)){
 					HAL_Delay(500);
-					flag.imu_store_2 = 1;
+					flag.log_store = 1;
 					maxon_ctrl(robot_speed, robot_speed);
 					flag.speed_ctrl_enable = 1;
 					timer.my_timer2 = 0;
-					speed_L = 3000*1.1;
-					speed_R = 3000*1.1;
+					speed_L = 1000;
+					speed_R = 1000;
 					flag.acc = 1;
 				}
 				else if(SW(3)){
@@ -146,16 +146,16 @@ char debug_lcd(){
 					printf("sd_write\r\n");
 				}
 
-				if(timer.my_timer2 >= 900){
-					speed_L = speed_R = 0;
+				if(timer.my_timer2 >= 500){
+					speed_L = speed_R = 1400;
 				}
 
-				if((total_encL + total_encR) / 2 >= 60000 || flag.imu_store_2 == 0){
+				if((total_encL + total_encR) / 2 >= 60000 || flag.log_store == 0){
 					maxon_ctrl(0, 0);
 					speed_L = speed_R = 0;
 					flag.speed_ctrl_enable = 0;
 					total_encL = total_encR = 0;
-					flag.imu_store_2 = 0;
+					//flag.imu_store_2 = 0;
 					flag.acc = 0;
 				}
 
@@ -191,12 +191,12 @@ char debug_lcd(){
 					HAL_Delay(500);
 					robot_speed = 300;
 					timer.my_timer2 = 0;
-					flag.imu_store_2 = 1;
+					flag.log_store = 1;
 					flag.speed_ctrl_enable = 1;
 				}
 				else if(SW(2)){
 					robot_speed = 0;
-					flag.imu_store_2 = 0;
+					flag.log_store = 0;
 				}
 				else if(SW(3)){
 					LED('N');
@@ -212,7 +212,7 @@ char debug_lcd(){
 					robot_speed = 0;
 					tim = timer.my_timer2;
 					total_encL = total_encR = 0;
-					flag.imu_store_2 = 0;
+					flag.log_store = 0;
 					flag.speed_ctrl_enable = 0;
 
 				}
@@ -645,8 +645,9 @@ char running_processing(){
 
 	/*----------------ゴール判定-------------------*/
 
-	if(start_goal_cnt >= 2)	ret = 1;
+	//if(start_goal_cnt >= 2)	ret = 1;
 	//if((total_encL + total_encR) / 2 >= 56195)	ret = 1;
+	if(flag.log_store == 0) ret = 1;
 	if(flag.error == 1)	ret = -1;
 
 	return ret;
@@ -722,7 +723,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//タイマー割�
 		timer.imu_timer = 0;
 	}
 */
-	store_imu_data_2(flag.imu_store_2);
+	store_log_data(flag.log_store);
 
 	choice_following_mode(flag.following_start);
 	sensor_following(flag.following);
@@ -827,6 +828,7 @@ void flag_set(){
 	flag.enc_memory_reset = 1;
 	flag.speed_ctrl_enable = 1;
 	flag.sd_record  = 1;
+	flag.log_store = 1;
 
 }
 
@@ -1424,23 +1426,28 @@ void store_imu_data(char Flag){
 //* 戻り値：　void:
 //* 備考 :
 //************************************************************************/
-void store_imu_data_2(char Flag){
+void store_log_data(char Flag){
 	static short access;
 	float now_speed_L = 0, now_speed_R = 0, omega = 0, velo = 0;
 
 	if(Flag){
 		now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();			//[mm/s]
 		now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+
 		omega = now_speed_R / (TRED/2);
 		velo = (now_speed_L + now_speed_R) / 2;
+
 		various_memory1[access] = now_speed_L;
 		various_memory2[access] = now_speed_R;
-		radius_memory_3[access] = omega_z_l;
+
+		various_memory3[access] = speed_L;
+		various_memory4[access] = speed_R;
+
 		access++;
 
 		if(access >= MEMORY_ARRAY_SIZE_2 - 1){
 			access = 0;
-			flag.imu_store_2 = 0;
+			flag.log_store = 0;
 		}
 	}
 
@@ -1805,7 +1812,7 @@ void mesurment_reset(){
 //************************************************************************/
 void sensor_following(char flag){
 	float input_vcm = 0;
-	float kp = 2.0, ki  = 10, kd = 0.004;	//beforer float kp = 0.8, ki  = 10, kd = 0.005;
+	float kp = 1.5, ki  = 10, kd = 0.003;	//beforer float kp = 2.0, ki  = 10, kd = 0.004;
 	float p = 0, d = 0, i = 0;
 	float devi = 0;
 	static float pre_devi;
@@ -2021,7 +2028,7 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 	#define I_LIMIT 2000
 
 	float input_L = 0, input_R = 0, input = 0;
-	float kp = 1, ki = 150, kd = 0;	// beforer float kp = 0.624, ki = 160 float kp = 0.9, ki = 9;float kp = 0.5, ki = 40, kd = 0.00010;
+	float kp = 0.6, ki = 150, kd = 0;	// float kp = 1, ki = 150, kd = 0;, beforer float kp = 0.624, ki = 160 float kp = 0.9, ki = 9;float kp = 0.5, ki = 40, kd = 0.00010;
 	float p_L = 0, p_R = 0, p = 0;
 	static float i_L = 0, i_R = 0, i = 0;
 	float d_L = 0, d_R = 0, d = 0;
@@ -2038,58 +2045,17 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 		now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();		//[mm/s]
 		now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
 
-//------------------------FF--------------------------//
-
-		if(now_speed_L >= targetL - 200 && now_speed_L <= targetL + 200){//目標に近づいたら
-			cntL++;
-		}
-		else{
-			cntL = 0;
-		}
-
-		if(cntL >= 10){
-			ff_accele_L = 0;
-			i_L = 0;
-			cntL = 0;
-		}
-		else if(fabs(pre_speed_L - targetL) > 500){
-			if(now_speed_L > targetL){	//目標値より高い場合
-				ff_accele_L = -10;
-			}
-			else if(now_speed_L < targetL) {//目標値より低い場合
-				ff_accele_L = 10;
-			}
-		}
-
-		if(now_speed_R >= targetR - 200 && now_speed_R <= targetR + 200){
-			cntR++;
-		}
-		else{
-			cntR = 0;
-		}
-
-		if(cntR >= 10){
-			ff_accele_R = 0;
-			i_R = 0;
-			cntR = 0;
-		}
-		else if(fabs(pre_speed_R - targetR) > 500){
-			if(now_speed_R > targetR){	//目標値より高い場合
-				ff_accele_R = -10;
-			}
-			else if(now_speed_R < targetR) {//目標値より低い場合
-				ff_accele_R = 10;
-			}
-		}
-
-		pre_speed_L = targetL;
-		pre_speed_R = targetR;
-
-		calc_feed_forward(ff_accele_L, ff_accele_R, 0, &ff_duty_L, &ff_duty_R);
-//--------------------------------------------------//
-
 		speed = (now_speed_L + now_speed_R) / 2;
-
+		targetL *= 1.25;
+		targetR *= 1.25;
+/*
+		if(targetL > targetR){//補正
+			targetL *= 1.1;
+		}
+		else if(targetR > targetL){//補正
+			targetR *= 1.1;
+		}
+*/
 		devi_L = targetL - now_speed_L;
 		p_L = devi_L * kp;
 		i_L += devi_L * DELTA_T * ki;
@@ -2115,9 +2081,59 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 		if(i > I_LIMIT)	i = I_LIMIT;
 		else if(i < -I_LIMIT)	i = -I_LIMIT;
 
+//------------------------FF--------------------------//
+		if(now_speed_L >= targetL - 200 && now_speed_L <= targetL + 200){//目標に近づいたら
+			cntL++;
+		}
+		else{
+			cntL = 0;
+		}
 
-		input_L = ((p_L + i_L) + ff_duty_L) * 1.1475;
-		input_R = ((p_R + i_R) + ff_duty_R) * 1.1475;
+		if(cntL >= 10){
+			ff_accele_L = 0;
+			i_L = 0;
+			cntL = 0;
+		}
+		else if(fabs(pre_speed_L - targetL) > 500){
+			if(now_speed_L > targetL){	//目標値より高い場合
+				ff_accele_L = -20;
+			}
+			else if(now_speed_L < targetL) {//目標値より低い場合
+				ff_accele_L = 20;
+			}
+			//i_L = 0;
+		}
+
+		if(now_speed_R >= targetR - 200 && now_speed_R <= targetR + 200){
+			cntR++;
+		}
+		else{
+			cntR = 0;
+		}
+
+		if(cntR >= 10){
+			ff_accele_R = 0;
+			i_R = 0;
+			cntR = 0;
+		}
+		else if(fabs(pre_speed_R - targetR) > 500){
+			if(now_speed_R > targetR){	//目標値より高い場合
+				ff_accele_R = -20;
+			}
+			else if(now_speed_R < targetR) {//目標値より低い場合
+				ff_accele_R = 20;
+			}
+			//i_R = 0;
+		}
+
+		pre_speed_L = targetL;
+		pre_speed_R = targetR;
+
+		calc_feed_forward(ff_accele_L, ff_accele_R, 0, &ff_duty_L, &ff_duty_R);
+
+//--------------------------------------------------//
+		input_L = ((p_L + i_L) + ff_duty_L);
+		input_R = ((p_R + i_R) + ff_duty_R);
 		//input_L = (p_L + i_L);
 		//input_R = (p_R + i_R);
 		//input_L = ff_duty_L;
@@ -2317,7 +2333,7 @@ char vcm_kill(char Flag, float PulseWidth){
 			error_cnt += 1;
 		}
 		if((ANGLE_LIMIT_HIGH < Pot) && (PulseWidth >= VCM_MAX_RATIO - 50)){
-				error_cnt += 1;
+			error_cnt += 1;
 		}
 
 		if(PulseWidth >= VCM_MAX_RATIO - 50){
@@ -2352,7 +2368,7 @@ char error_check(char *error_num){
 
 	*error_num = 0;
 	if(vcm_kill(flag.error_check_enable, monitoring_vcm_pulse_width)){
-		ret = 1;
+		//ret = 1;
 		*error_num |= 0x01;
 	}
 	if(off_line_check(flag.error_check_enable)){
