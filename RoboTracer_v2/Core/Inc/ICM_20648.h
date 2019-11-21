@@ -6,7 +6,7 @@
 
 extern SPI_HandleTypeDef hspi3;
 // IMUから取得したデータ
-extern volatile uint16_t 	xa, ya, za; // 加速度(16bitデータ)
+extern volatile int16_t 	xa, ya, za; // 加速度(16bitデータ)
 extern volatile int16_t 	xg, yg, zg;	// 角加速度(16bitデータ)
  
 #define CS_RESET HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET)

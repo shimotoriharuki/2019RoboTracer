@@ -1,7 +1,7 @@
 //ICM_20648.c Ver.1.0
 #include "ICM_20648.h"
 
-volatile uint16_t	xa, ya, za; // 加速度(16bitデータ)
+volatile int16_t	xa, ya, za; // 加速度(16bitデータ)
 volatile int16_t xg, yg, zg;	// 角加速度(16bitデータ)
 
 uint8_t read_byte( uint8_t reg ) {

@@ -99,12 +99,12 @@ char debug_lcd(){
 			*/
 			//--------------------------------------------------------
 			case 2:
-				/*				lcd_clear();
+				lcd_clear();
 				lcd_locate(0,0);
 				lcd_printf("SL: %d", SideL);
 				lcd_locate(0,1);
 				lcd_printf("SR: %d", SideR);
-				*/
+
 				/*
 				lcd_clear();
 				lcd_locate(0,0);
@@ -119,7 +119,7 @@ char debug_lcd(){
 				lcd_locate(0,1);
 				lcd_printf("DL:%dDR:%d", getDigital('L'), getDigital('R'));
 				*/
-
+/*
 				lcd_clear();
 				lcd_locate(0,0);
 				lcd_printf("FF");
@@ -147,10 +147,10 @@ char debug_lcd(){
 				}
 
 				if(timer.my_timer2 >= 500){
-					speed_L = speed_R = 1400;
+					speed_L = speed_R = 1000;
 				}
 
-				if((total_encL + total_encR) / 2 >= 60000 || flag.log_store == 0){
+				if((total_encL + total_encR) / 2 >= 70000 || flag.log_store == 0){
 					maxon_ctrl(0, 0);
 					speed_L = speed_R = 0;
 					flag.speed_ctrl_enable = 0;
@@ -158,6 +158,7 @@ char debug_lcd(){
 					//flag.imu_store_2 = 0;
 					flag.acc = 0;
 				}
+				*/
 
 				LED('G');
 			break;
@@ -172,14 +173,15 @@ char debug_lcd(){
 			*/
 			//--------------------------------------------------------
 			case 4:
-				/*
+
 				lcd_clear();
 				lcd_locate(0,0);
-				lcd_printf("pot:%d", Def_ref);
+				lcd_printf("1:%d", timer.check_timer);
 				lcd_locate(0,1);
-				lcd_printf("R:%f", getRadius());
-				*/
+				lcd_printf("2:%d", timer.check_01ms);
 
+
+				/*
 				lcd_clear();
 				lcd_locate(0,0);
 				lcd_printf("imu test");
@@ -223,7 +225,7 @@ char debug_lcd(){
 				else if(total_encL > ONE_ROTATION_COUNT/4 || total_encR > ONE_ROTATION_COUNT/4){
 					robot_speed = 500;
 				}
-
+				*/
 				LED('Y');
 
 				/*
@@ -470,9 +472,10 @@ char running_processing(){
 	if(start_goal_cnt == 1 && flag.enc_memory_reset == 1){	//エンコーダ初期化
 		total_encL_memory = total_encR_memory = total_encL = total_encR = 0;
 		flag.enc_memory_reset = 0;
+		yaw_angle = 0;
 	}
 	/*-----------------一定距離でコース記憶-------------------*/
-
+	course_memory_const_distance(flag.course_memory_distance);
 
 
 
@@ -593,24 +596,39 @@ char running_processing(){
 	if(flag.error)	LED('M');
 
 
-	if(target_robot_speed == HIGH_SPEED){	////float kp = 30, ki  = 100, kd = 0.5;	//beforer float float kp = 2.5, ki  = 20, kd = 0.04;
+	if(target_robot_speed == HIGH_SPEED_DISTANCE){	////float kp = 30, ki  = 100, kd = 0.5;	//beforer float float kp = 2.5, ki  = 20, kd = 0.04;
 		gain.kp = 8;	//8
 		gain.ki = 20;	//50
 		gain.kd = 0.5;	//0,45
 		//LED('R');
 	}
-	else if(target_robot_speed == COMM_SPEED){
-		gain.kp = 3.6;
+	else if(target_robot_speed == COMM_H_SPEED_DISTANCE){
+		gain.kp = 4.5;
 		gain.ki = 10;
-		gain.kd = 0.1;
+		gain.kd = 0.2;
 		//LED('Y');
 	}
-	else if(target_robot_speed == LOW_SPEED){
+	else if(target_robot_speed == LOW_SPEED_DISTANCE || target_robot_speed == COMM_L_SPEED_DISTANCE ){
 
-		gain.kp = 3.6;	//3.6
+		gain.kp = 3.0;	//4
+		gain.ki = 10;
+		gain.kd = 0.15;	//0.15
+
+		/*when straight
+		gain.kp = 3.8;	//4
+		gain.ki = 10;
+		gain.kd = 0.15;	//0.15
+		*/
+		/*//1450 to 2100
+		gain.kp = 3.8;	//3.6
 		gain.ki = 0;
-		gain.kd = 0.1;	//0.1
-
+		gain.kd = 0.13;	//0.1
+		*/
+		/*//3000
+		gain.kp = 4.5;	//3.6
+		gain.ki = 0;
+		gain.kd = 0.2;	//0.1
+		*/
 		/*//タイヤすり減ってるとき
 		gain.kp = 3.4;
 		gain.ki = 0;
@@ -619,24 +637,25 @@ char running_processing(){
 
 		//LED('B');
 	}
+	/*
 	else if(target_robot_speed == HIGH_SPEED_2){
 		gain.kp = 8;	//8
-		gain.ki = 20;	//50
-		gain.kd = 0.5;	//0,45
+		gain.ki = 20;	//20
+		gain.kd = 0.5;	//0.5
 		//LED('R');
 	}
 	else if(target_robot_speed == COMM_SPEED_2){
-		gain.kp = 3.6;	//8
-		gain.ki = 10;	//50
-		gain.kd = 0.1;	//0,45
+		gain.kp = 3.6;	//3.6
+		gain.ki = 10;	//10
+		gain.kd = 0.1;	//0.1
 		//LED('R');
 	}else if(target_robot_speed == LOW_SPEED_2){
-		gain.kp = 3.6;	//8
-		gain.ki = 0;	//50
-		gain.kd = 0.1;	//0,45
+		gain.kp = 3.6;	//3.6
+		gain.ki = 10;	//10
+		gain.kd = 0.1;	//0.1
 		//LED('R');
 	}
-
+	*/
 
 	/*
 	if(flag.side == 1)	LED('R');
@@ -645,9 +664,9 @@ char running_processing(){
 
 	/*----------------ゴール判定-------------------*/
 
-	//if(start_goal_cnt >= 2)	ret = 1;
-	//if((total_encL + total_encR) / 2 >= 56195)	ret = 1;
-	if(flag.log_store == 0) ret = 1;
+	if(start_goal_cnt >= 2)	ret = 1;
+	//if((total_encL + total_encR) / 2 >= 95000)	ret = 1;
+	//if(flag.log_store == 0) ret = 1;
 	if(flag.error == 1)	ret = -1;
 
 	return ret;
@@ -690,60 +709,91 @@ char goal_area_processing(char reset){
 }
 
 //************************************************************************/
-//* 役割　：　タイマ割り込みコールバック関数
+//* 役割　：　タイマ割り込みコールバック関数 1ms
 //* 引数　：　よくわからない
 //* 戻り値：　void:
 //* 備考 : なし
 //************************************************************************/
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//タイマー割り込みで呼び出される
-
-	increment_mytimer();
-	//accelerator(flag.acc, increment_acc);
-
-	if(timer.pot_timer >= 2){	//1msごと 1sぶん格納できる
-		store_pot_data(flag.pot_store, &number_stored);
-		timer.pot_timer = 0;
-	}
-
-	flag.error = error_check(&error_number);
-
-	updata_ADval();
-
-	read_gyro_data();
-	read_accel_data();
-	updata_imu_data_lowpassed();
-
 /*
-	if(timer.imu_timer >= 100 && flag.sd_record == 1){
-		float now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();			//[mm/s]
-		float now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
-		sd_write_array(FOLDER_3, "run_veloL.txt", 1, &now_speed_L, ADD_WRITE);
-		sd_write_array(FOLDER_3, "run_veloR.txt", 1, &now_speed_R, ADD_WRITE);
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){	//タイマー割り込みで呼び出される
+//void TIM6_DAC1_IRQHandler(void){
 
-		timer.imu_timer = 0;
-	}
-*/
-	store_log_data(flag.log_store);
+	#define AVE_NUM 10
+	static int sum_pot = 0;
 
-	choice_following_mode(flag.following_start);
-	sensor_following(flag.following);
-	angle_ctrl(flag.angle, 0);
+	timer.check_01ms++;
 
-	//calc_feed_forward(ff_accele_L, ff_accele_R, 0, &ff_duty_L, &ff_duty_R);
-	Line_trace(flag.line_trace);
+	//sum_pot += (2048 - ad1[6]);
 
-	//speed_ctrl(flag.speed_ctrl_enable, speed_L, speed_R, robot_speed, &speed_val);//普通は消す
+//	if(timer.check_01ms >= 9){
+//		average_pot = sum_pot / AVE_NUM;
+//		sum_pot = 0;
 
-	hand_push_trace(flag.hand_push);
+//		timer.check_01ms = 0;
 
-	updata_enc_cnt(&total_encL, &total_encR, &total_encL_memory, &total_encR_memory, &total_encL_distance, &total_encR_distance);
+		increment_mytimer();
+		//accelerator(flag.acc, increment_acc);
+	/
+		if(timer.pot_timer >= 2){	//1msごと 1sぶん格納できる
+			store_pot_data(flag.pot_store, &number_stored);
+			timer.pot_timer = 0;
+		}
+	/
+		flag.error = error_check(&error_number);
 
-	enc_reset();	//初期値にする
+		updata_ADval();
+		//updata_now_speed(&now_speed_L, &now_speed_R);
 
-	//full_color();
+		read_gyro_data();
+		read_accel_data();
+		updata_imu_data_lowpassed();
 
+		store_imu_data(flag.pot_store, &number_stored);
+
+		/
+		if(timer.log >= 100 && flag.sd_record == 1){
+			float now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();			//[mm/s]
+			float now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+			float ave_speed = (now_speed_L + now_speed_R) / 2;
+
+			sd_write(1, &ave_speed, ADD_WRITE);
+
+			timer.log = 0;
+		}
+		/
+
+		store_log_data(flag.log_store);
+
+		choice_following_mode(flag.following_start);
+		sensor_following(flag.following);
+		angle_ctrl(flag.angle, 0);
+
+		//calc_feed_forward(ff_accele_L, ff_accele_R, 0, &ff_duty_L, &ff_duty_R);
+		Line_trace(flag.line_trace);
+
+		//speed_ctrl(flag.speed_ctrl_enable, speed_L, speed_R, robot_speed, &speed_val);//普通は消す
+
+		hand_push_trace(flag.hand_push);
+
+		updata_enc_cnt(&total_encL, &total_encR, &total_encL_memory, &total_encR_memory, &total_encL_distance, &total_encR_distance);
+
+		enc_reset();	//初期値にする
+//	}
 }
+*/
 
+//************************************************************************/
+//* 役割　：　タイマ割り込みコールバック関数 0.1ms
+//* 引数　：　よくわからない
+//* 戻り値：　void:
+//* 備考 : なし
+//************************************************************************/
+/*
+void TIM7_DAC2_IRQHandler(void){
+
+	timer.check++;
+}
+*/
 /************************************************************************/
 //* 役割　：　イニシャライズ関数
 //* 引数　：　void:
@@ -776,6 +826,8 @@ void init(){
 	TIM5 -> CNT = ENCORDER_OFFSET;
 
 	HAL_TIM_Base_Start_IT(&htim6);	//タイマ㿼割り込みスターヿ
+	HAL_TIM_Base_Start_IT(&htim7);	//タイマ㿼割り込みスターヿ
+
 	HAL_TIM_Encoder_Start(&htim4,TIM_CHANNEL_ALL);	//エンコーヿースターヿ
 	HAL_TIM_Encoder_Start(&htim5,TIM_CHANNEL_ALL);	//エンコーヿースターヿ
 	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, GPIO_PIN_RESET);	//センサーFETON
@@ -807,6 +859,9 @@ void flag_reset(){
 	flag.acc = 0;
 	//total_encL = total_encR = 0;
 	flag.sd_record  = 0;
+	flag.course_memory_distance = 0;
+	//SD
+	//user_fclose();
 }
 
 
@@ -829,6 +884,10 @@ void flag_set(){
 	flag.speed_ctrl_enable = 1;
 	flag.sd_record  = 1;
 	flag.log_store = 1;
+	flag.course_memory_distance = 1;
+
+	//SD
+	//user_fopen("running_log", "log.txt");
 
 }
 
@@ -849,7 +908,7 @@ void motor_reset(){
 //* 戻り値：　void:
 //* 備考 :
 //************************************************************************/
-void lowpass_filter(int in_data[], float out_data[], short size, float freq, float samplerate, float q){
+void lowpass_filter(float in_data[], float out_data[], short size, float freq, float samplerate, float q){
 	// フィルタ係数を計算する
 	float omega = 2.0f * 3.14159265f * freq / samplerate;
 	float alpha = sin(omega) / (2.0f * q);
@@ -1046,6 +1105,80 @@ void create_speed_table_2(){
 }
 
 //************************************************************************/
+//* 役割　：　記憶したポテンショの値から速度を配列に打ち込む　距離バージョン
+//* 引数　：　void:
+//* 戻り値：　void:
+//* 備考 :
+//************************************************************************/
+void create_speed_table_distance(){
+	//char minus = 0;
+	short temp = 0;
+	//short i = 1;
+	short access = 0;
+	short speed_access = 0;
+
+	for(access = 0; access < MEMORY_ARRAY_SIZE; access++){
+		temp = radius_memory[access];
+		if(temp < 0){
+			temp *= -1;
+			//minus = 1;
+		}
+
+		if(temp < 7){			//R10以下
+			speed_table[access] = HIGH_SPEED_DISTANCE;
+		}
+		else if(temp < 100){	//R10以下
+			speed_table[access] = COMM_H_SPEED_DISTANCE;
+		}
+		else if(temp < 300){	//R10以下
+			speed_table[access] = COMM_L_SPEED_DISTANCE;
+		}
+		else if(temp < 300){	//R10以下
+			speed_table[access] = LOW_SPEED_DISTANCE;
+		}
+
+	}
+
+}
+
+//************************************************************************/
+//* 役割　：　記憶したポテンショの値から速度を配列に打ち込む　関数バージョン
+//* 引数　：　void:
+//* 戻り値：　void:
+//* 備考 :
+//************************************************************************/
+void create_speed_table_func(){
+	//char minus = 0;
+	short temp = 0;
+	//short i = 1;
+	short access = 0;
+
+	for(access = 0; access < MEMORY_ARRAY_SIZE; access++){
+		temp = radius_memory[access];
+		if(temp < 0){
+			temp *= -1;
+			//minus = 1;
+		}
+
+		speed_table[access] = velocity_func(temp);
+
+	}
+
+
+}
+
+//************************************************************************/
+//* 役割　：　速度計画関数
+//* 引数　：　float:
+//* 戻り値：　float:
+//* 備考 :
+//************************************************************************/
+float velocity_func(float x){
+
+	return  0.000000002 * x * x * x + -0.000008321* x * x +  0.0104 * x + 0.3429;
+
+}
+//************************************************************************/
 //* 役割　：　ポテンショの値から半径を計算して返す
 //* 引数　：　void:
 //* 戻り値：　float: 半径[mm]
@@ -1104,30 +1237,40 @@ float getRadius_imu(){
 //************************************************************************/
 short course_memory(char enable){
 	static short memory_access = 0;
+	float len = 0;
+	float ave = 0;
 
 	if(enable){
-		lowpass_filter(retention_pot, lowpassed_pot, RETENTION_ARRAY_SIZE, FREQ, SAMPLERATE, Q);
+		//lowpass_filter(retention_imu, lowpassed_array, RETENTION_ARRAY_SIZE, FREQ, SAMPLERATE, Q);
 
 		for(short i = 0; i < number_stored; i++){
-			add_pot += lowpassed_pot[i];
+			add_imu += lowpassed_array[i];
 		}
-		//add_pot /= RETENTION_ARRAY_SIZE;
-		//add_pot /= number_stored;
-		radius_memory[memory_access] = add_pot / number_stored;
-		radius_memory[memory_access] = (radius_memory[memory_access] / number_stored) * 100;
 
-		//radius_memory[memory_access] = maximam(lowpassed_pot, RETENTION_ARRAY_SIZE);
+		add_imu /= number_stored;	//平均
 
-		if(add_pot < 0){
-			//radius_memory[memory_access] = add_pot * 100000 / (total_encL_memory - encorder_memoryL[memory_access - 1]);
+		len = MM_PER_PULS * (total_encR_memory + total_encL_memory) / 2;	//扇の長さ
+
+		//radius_memory[memory_access] = (add_imu / number_stored);
+/*
+		if(yaw_angle != 0)	radius_memory[memory_access] = add_imu;
+		else radius_memory[memory_access] = 99999999;
+*/
+		if(yaw_angle != 0)	radius_memory[memory_access] = len / yaw_angle;
+		else radius_memory[memory_access] = 99999999;
+
+		len = 0;
+		yaw_angle = 0;
+		add_imu = 0;
+
+		if(add_imu < 0){
 			encorder_playback[memory_access] = total_encR_memory;
 		}
 		else{
-			//radius_memory[memory_access] = add_pot * 100000 / (total_encR_memory - encorder_memoryR[memory_access - 1]);
 			encorder_playback[memory_access] = total_encL_memory;
 		}
 
-		add_pot = 0;
+
 		encorder_memoryL[memory_access] = total_encL_memory;
 		encorder_memoryR[memory_access] = total_encR_memory;
 
@@ -1135,10 +1278,11 @@ short course_memory(char enable){
 		if(memory_access >= MEMORY_ARRAY_SIZE)	memory_access = MEMORY_ARRAY_SIZE - 1;
 
 		for(short i = 0; i < RETENTION_ARRAY_SIZE; i++){
-			retention_pot[i] = 0;
-			lowpassed_pot[i] = 0;
+			retention_imu[i] = 0;
+			lowpassed_array[i] = 0;
 		}
 
+		total_encL_memory = total_encR_memory = 0;
 		flag.retention_reset = 1;
 		number_stored = 0;
 	}
@@ -1155,10 +1299,29 @@ short course_memory(char enable){
 short course_memory_const_distance(char enable){
 	float ave_total = (total_encL_distance + total_encR_distance) / 2;
 	static short data_access = 0;
+	float pot_radius = 0, imu_radius = 0;
+	float omega_pot = 0;
+	float velocity_enc = 0;
+	float velocity_a = 0;
+
+	float now_speed_L, now_speed_R;
 
 	if(enable){
+
+		now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();		//[mm/s]
+		now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+
+		if(Pot != 0) pot_radius = ROTATION_POINT_FROM_AXEL / tan(Pot * RAD_PER_AD);	//[mm]
+		else pot_radius = 99999999;
+
+		velocity_enc = 10 * (now_speed_L + now_speed_R) / 2;
+
+		omega_pot = -(velocity_enc / pot_radius) * 10;
+		velocity_a = alpha_y_l * DELTA_T;
+
 		if(ave_total >= COUNT_TO_RECORD){
-			radius_memory[data_access] = zg_l;
+			imu_radius_memory_distance[data_access] = imu_radius;
+			pot_radius_memory_distance[data_access] = velocity_enc;
 			total_encL_distance = total_encR_distance = 0;
 			data_access++;
 		}
@@ -1167,7 +1330,7 @@ short course_memory_const_distance(char enable){
 		data_access = 0;
 	}
 
-	if(data_access >= MEMORY_ARRAY_SIZE_2)	data_access = MEMORY_ARRAY_SIZE_2 - 1;
+	if(data_access >= MEMORY_ARRAY_SIZE_DISTANCE)	data_access = MEMORY_ARRAY_SIZE_DISTANCE - 1;
 
 	return data_access;
 }
@@ -1181,20 +1344,33 @@ short course_memory_const_distance(char enable){
 void updata_imu_data_lowpassed(){
 
 	static float pre_xg = 0, pre_yg = 0, pre_zg = 0;
+	static float pre_xa = 0, pre_ya = 0, pre_za = 0;
 
 	omega_x = (xg / 16.4) * PI / 180;
 	omega_y = (yg / 16.4) * PI / 180;
 	omega_z = (zg / 16.4) * PI / 180;
 
+	alpha_x = (xa / 2048) / 9.806;
+	alpha_y = (ya / 2048) / 9.806;
+	alpha_z = (za / 2048) / 9.806;
+
 	omega_x_l = lowpass_filter_simple(omega_x, pre_xg, R);
 	omega_y_l = lowpass_filter_simple(omega_y, pre_yg, R);
 	omega_z_l = lowpass_filter_simple(omega_z, pre_zg, R);
 
+	alpha_x_l = lowpass_filter_simple(alpha_x, pre_xa, R);
+	alpha_y_l = lowpass_filter_simple(alpha_y, pre_ya, R);
+	alpha_z_l = lowpass_filter_simple(alpha_z, pre_za, R);
 
+	yaw_angle += omega_z_l * DELTA_T;
 
 	pre_xg = omega_x_l;
 	pre_yg = omega_y_l;
 	pre_zg = omega_z_l;
+
+	pre_xa = alpha_x_l;
+	pre_ya = alpha_y_l;
+	pre_za = alpha_z_l;
 
 }
 
@@ -1232,6 +1408,17 @@ char encorder_correction(short access, int reference){
 }
 
 //************************************************************************/
+//* 役割　：　今の計測速度を更新
+//* 引数　：　char: フラグ enable
+//* 戻り値：　void:
+//* 備考 :
+//************************************************************************/
+void updata_now_speed(float *l, float *r){
+	*l = MM_PER_PULS * 1000. * getEncorder_L();			//[mm/s]
+	*r = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+}
+
+//************************************************************************/
 //* 役割　：　記憶したデータをもとにtarget_robot_speedを更新する
 //* 引数　：　char: フラグ enable
 //* 戻り値：　void:
@@ -1254,6 +1441,16 @@ void updata_robot_speed(char Flag){
 	int reference_encorder = 0;
 	static char ignore_cnt = 0;
 	static char status = 0;
+
+	float ave_velo = 0;
+
+	float now_speed_L, now_speed_R;
+
+	now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();		//[mm/s]
+	now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+
+	ave_velo = (now_speed_L + now_speed_R) / 2;
+
 
 	if(flag.updata_robot_speed_reset){
 		ignore = 0;
@@ -1407,17 +1604,40 @@ void updata_robot_speed(char Flag){
 //* 戻り値：　void:
 //* 備考 :
 //************************************************************************/
-void store_imu_data(char Flag){
+void store_imu_data(char enable, short *store_num){
 	static short access;
+	static unsigned long cnt = 0;
+	static char over_flag = 0;
 
-	if(Flag){
-		//imu_data[access] = getRadius_imu();
-		imu_data[access] = Pot;
+	if(enable){
+		if(flag.retention_reset == 1){
+			access = 0;
+			cnt = 0;
+			over_flag = 0;
+			flag.retention_reset = 0;
+		}
+
+		if(over_flag == 0){
+			*store_num = access;
+		}
+		else *store_num = RETENTION_ARRAY_SIZE;
+
+		//retention_imu[access] = omega_z_l;
+		retention_imu[access] = yaw_angle;
 		access++;
+		cnt++;
 
-		if(access >= 9999)	access = 9999;
+		if(access >= RETENTION_ARRAY_SIZE){
+			access = 0;
+			over_flag = 1;
+		}
+		if(cnt >= LONG_MAX)	cnt = LONG_MAX;
+
+		//add_pot += Pot;
+		//if(add_pot >= INT_MAX)	add_pot = INT_MAX;
+		//if(add_pot <= INT_MIN)	add_pot = INT_MIN;
+
 	}
-
 }
 
 //************************************************************************/
@@ -1428,10 +1648,12 @@ void store_imu_data(char Flag){
 //************************************************************************/
 void store_log_data(char Flag){
 	static short access;
-	float now_speed_L = 0, now_speed_R = 0, omega = 0, velo = 0;
+	float omega = 0, velo = 0;
+	float now_speed_L, now_speed_R;
 
 	if(Flag){
-		now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();			//[mm/s]
+
+		now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();		//[mm/s]
 		now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
 
 		omega = now_speed_R / (TRED/2);
@@ -1440,8 +1662,8 @@ void store_log_data(char Flag){
 		various_memory1[access] = now_speed_L;
 		various_memory2[access] = now_speed_R;
 
-		various_memory3[access] = speed_L;
-		various_memory4[access] = speed_R;
+		//various_memory3[access] = speed_L;
+		//various_memory4[access] = speed_R;
 
 		access++;
 
@@ -1812,7 +2034,7 @@ void mesurment_reset(){
 //************************************************************************/
 void sensor_following(char flag){
 	float input_vcm = 0;
-	float kp = 1.5, ki  = 10, kd = 0.003;	//beforer float kp = 2.0, ki  = 10, kd = 0.004;
+	float kp = 1.8, ki  = 10, kd = 0.004;	//3s first float kp = 1, ki  = 0, kd = 0.001; 2sbeforer float kp = 2.0, ki  = 10, kd = 0.004; 2s
 	float p = 0, d = 0, i = 0;
 	float devi = 0;
 	static float pre_devi;
@@ -1909,24 +2131,46 @@ void updata_curve_val(char Flag, short ref, float _robot_speed, float *p_def_spe
 //************************************************************************/
 void updata_straight_val(char Flag, float _robot_speed, float *p_speedL, float *p_speedR, float kp, float ki, float kd){
 	//float kp = 30, ki  = 100, kd = 0.5;	//beforer float float kp = 2.5, ki  = 20, kd = 0.04; 静かなゲインfloat kp = 2, ki  = 0, kd = 0.02;
+
+
 	float p = 0, d = 0, i = 0;
 	float devi = 0;
 	static float pre_devi;
+	static short access = 0;
+	//#define STORE_POT_NUM 10
+	//static short ave_access = 0;
+	//static float store_pot[STORE_POT_NUM];
+	//float ave_pot = 0;
+	static char memory_Flag = 1;
 
 	if(Flag){
 		devi = 0 - Pot;		//目標値が0
+		//devi = 0 - ave_pot;		//目標値が0
 
 		p = kp * devi;
 		d = (float)(kd * (devi - pre_devi) / DELTA_T);
 		i += ki * DELTA_T * devi;
 
-		if(i > 100)	i = 100;
-		else if(i < -100)	i = -100;
+		if(i > 1000)	i = 1000;
+		else if(i < -1000)	i = -1000;
 
 		*p_speedL = _robot_speed - (p + d + i);
 		*p_speedR = _robot_speed + (p + d + i);
 
+/*
+		if(memory_Flag){
+			various_memory1[access] = p + d + i;
+			various_memory2[access] = Pot;
+			access++;
+		}
+
+		if(access >= MEMORY_ARRAY_SIZE_2){
+			access = MEMORY_ARRAY_SIZE_2 - 1;
+			memory_Flag = 0;
+		}
+*/
 		pre_devi = devi;
+
 	}
 
 }
@@ -1974,18 +2218,19 @@ void Line_trace(char Flag){
 	float input_L = 0, input_R = 0;
 
 	if(Flag){
-		updata_curve_val(flag.curve, Def_ref, robot_speed, &speed_L, &speed_R);	//カーブ
+		//updata_curve_val(flag.curve, Def_ref, robot_speed, &speed_L, &speed_R);	//カーブ
 
-		//updata_straight_val(flag.straight, robot_speed, &speed_L, &speed_R, gain.kp, gain.ki, gain.kd);			//直線
+		updata_straight_val(flag.straight, robot_speed, &speed_L, &speed_R, gain.kp, gain.ki, gain.kd);			//直線
 		//trace(flag.trace, gain.kp, gain.ki, gain.kd, &trace_val);
 		//printf("%f\r\n", *p_def_speedL);
 
 		speed_ctrl(flag.speed_ctrl_enable, speed_L, speed_R, robot_speed, &speed_val);							//速度制御する
+/*
+		input_L = -trace_val + speed_val;
+		input_R =  trace_val + speed_val;
 
-		//input_L = -trace_val + speed_val;
-		//input_R = trace_val + speed_val;
-
-		//maxon_ctrl(input_L, input_R);
+		maxon_ctrl(input_L, input_R);
+*/
 	}
 }
 
@@ -2028,12 +2273,12 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 	#define I_LIMIT 2000
 
 	float input_L = 0, input_R = 0, input = 0;
-	float kp = 0.6, ki = 150, kd = 0;	// float kp = 1, ki = 150, kd = 0;, beforer float kp = 0.624, ki = 160 float kp = 0.9, ki = 9;float kp = 0.5, ki = 40, kd = 0.00010;
+	float kp = 0.9, ki = 150, kd = 0;	// float kp = 1, ki = 150, kd = 0;, beforer float kp = 0.624, ki = 160 float kp = 0.9, ki = 9;float kp = 0.5, ki = 40, kd = 0.00010;
 	float p_L = 0, p_R = 0, p = 0;
 	static float i_L = 0, i_R = 0, i = 0;
 	float d_L = 0, d_R = 0, d = 0;
 
-	float now_speed_L = 0, now_speed_R = 0;
+	float _now_speed_L = 0, _now_speed_R = 0;
 	float devi_L = 0, devi_R = 0, devi = 0;
 	static float pre_devi_L = 0, pre_devi_R = 0, pre_devi = 0;
 	float speed = 0;
@@ -2042,12 +2287,17 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 	static float pre_speed_L, pre_speed_R;
 
 	if(enable){
-		now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();		//[mm/s]
-		now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
 
-		speed = (now_speed_L + now_speed_R) / 2;
-		targetL *= 1.25;
-		targetR *= 1.25;
+		_now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();		//[mm/s]
+		_now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+
+		//_now_speed_L = now_speed_L;
+		//_now_speed_R = now_speed_R;
+
+		speed = (_now_speed_L + _now_speed_R) / 2;
+
+		//targetL *= 1.15;
+		//targetR *= 1.15;
 /*
 		if(targetL > targetR){//補正
 			targetL *= 1.1;
@@ -2056,12 +2306,12 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 			targetR *= 1.1;
 		}
 */
-		devi_L = targetL - now_speed_L;
+		devi_L = targetL - _now_speed_L;
 		p_L = devi_L * kp;
 		i_L += devi_L * DELTA_T * ki;
 		///d_L = kd * (devi_L - pre_devi_L) / DELTA_T;
 
-		devi_R = targetR - now_speed_R;
+		devi_R = targetR - _now_speed_R;
 		p_R = devi_R * kp;
 		i_R += devi_R * DELTA_T * ki;
 		//d_R = kd * (devi_R - pre_devi_R) / DELTA_T;
@@ -2080,9 +2330,9 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 
 		if(i > I_LIMIT)	i = I_LIMIT;
 		else if(i < -I_LIMIT)	i = -I_LIMIT;
-
+/*
 //------------------------FF--------------------------//
-		if(now_speed_L >= targetL - 200 && now_speed_L <= targetL + 200){//目標に近づいたら
+		if(_now_speed_L >= targetL - 200 && _now_speed_L <= targetL + 200){//目標に近づいたら
 			cntL++;
 		}
 		else{
@@ -2095,16 +2345,16 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 			cntL = 0;
 		}
 		else if(fabs(pre_speed_L - targetL) > 500){
-			if(now_speed_L > targetL){	//目標値より高い場合
-				ff_accele_L = -20;
+			if(_now_speed_L > targetL){	//目標値より高い場合
+				ff_accele_L = -10;
 			}
-			else if(now_speed_L < targetL) {//目標値より低い場合
-				ff_accele_L = 20;
+			else if(_now_speed_L < targetL) {//目標値より低い場合
+				ff_accele_L = 10;
 			}
 			//i_L = 0;
 		}
 
-		if(now_speed_R >= targetR - 200 && now_speed_R <= targetR + 200){
+		if(_now_speed_R >= targetR - 200 && _now_speed_R <= targetR + 200){
 			cntR++;
 		}
 		else{
@@ -2117,11 +2367,11 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 			cntR = 0;
 		}
 		else if(fabs(pre_speed_R - targetR) > 500){
-			if(now_speed_R > targetR){	//目標値より高い場合
-				ff_accele_R = -20;
+			if(_now_speed_R > targetR){	//目標値より高い場合
+				ff_accele_R = -10;
 			}
-			else if(now_speed_R < targetR) {//目標値より低い場合
-				ff_accele_R = 20;
+			else if(_now_speed_R < targetR) {//目標値より低い場合
+				ff_accele_R = 10;
 			}
 			//i_R = 0;
 		}
@@ -2132,20 +2382,21 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 		calc_feed_forward(ff_accele_L, ff_accele_R, 0, &ff_duty_L, &ff_duty_R);
 
 //--------------------------------------------------//
-		input_L = ((p_L + i_L) + ff_duty_L);
-		input_R = ((p_R + i_R) + ff_duty_R);
-		//input_L = (p_L + i_L);
-		//input_R = (p_R + i_R);
-		//input_L = ff_duty_L;
-		//input_R = ff_duty_R;
-		*val = p + i ;
+ */
+		//input_L = ((p_L + i_L) + ff_duty_L);
+		//input_R = ((p_R + i_R) + ff_duty_R);
+		input_L = (p_L + i_L);
+		input_R = (p_R + i_R);
+		//input_L = 1200;
+		//input_R = 1200;
+
+		*val = p + i +  + ff_duty_L ;
 
 		pre_devi_L = devi_L;
 		pre_devi_R = devi_R;
 		pre_devi = devi;
 
 		maxon_ctrl(input_L, input_R);
-		//maxon_ctrl(input, input);
 	}
 }
 
@@ -2515,7 +2766,7 @@ float speed_select(){
 					lcd_locate(0,1);
 					lcd_printf("1400mm/s");
 
-					speed = LOW_SPEED;
+					speed = LOW_SPEED_DISTANCE;
 					LED('G');
 				break;
 				/*
@@ -2544,7 +2795,7 @@ float speed_select(){
 					lcd_locate(0,1);
 					lcd_printf("1400mm/s");
 
-					speed = LOW_SPEED;
+					speed = LOW_SPEED_DISTANCE;
 					LED('B');
 
 				break;
@@ -2732,6 +2983,7 @@ void increment_mytimer(){
 	timer.imu_timer++;
 	timer.pot_timer++;
 	timer.check_timer++;
+	timer.log++;
 }
 
 //************************************************************************/
@@ -2924,8 +3176,8 @@ void updata_enc_cnt(int*encL, int *encR, int*encL_memory, int *encR_memory, shor
 	*encR += getEncorder_R();
 	*encL_memory += getEncorder_L();
 	*encR_memory += getEncorder_R();
-	encL_distance += getEncorder_L();
-	encR_distance += getEncorder_R();
+	*encL_distance += getEncorder_L();
+	*encR_distance += getEncorder_R();
 
 	/*　//オーバーフロー対策
 	if(*encL - pre_L < -10000) enc_overL++;
@@ -3021,15 +3273,28 @@ void vcm_ctrl(float power_vcm, float *now_pulsewidth){
 //************************************************************************/
 void updata_ADval(){
 
+	static float pre_pot = 0;
+
 	Line1 = ad1[0];
 	Line2 = ad1[1];
 	Line3 = ad1[2];
 	Line4 = ad1[3];
+/*
+	Line1 = average_sens1;
+	Line2 = average_sens2;
+	Line3 = average_sens3;
+	Line4 = average_sens4;
+*/
 	SideL = ad1[5];
 	SideR = ad1[4];
 
-	Pot	  = 2048 - ad1[6];
 
+	Pot	= 2048 - ad1[6];
+	//Pot = average_pot;
+	/*
+	Pot = lowpass_filter_simple(2048 - ad1[6], pre_pot, 1);
+	pre_pot = Pot;
+	*/
 	Def_ref = (2048 - ad1[6]);
 
 
