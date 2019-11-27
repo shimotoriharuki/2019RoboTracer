@@ -32,6 +32,8 @@ typedef struct {
 	char updata_robot_speed_reset;
 	char speed_ctrl_enable;
 	char sd_record;
+	char start_line_flag;
+	char yaw_zero;
 }Flag;
 
 typedef struct{
@@ -43,7 +45,8 @@ typedef struct{
 	short check_timer;
 	short check_01ms;
 	short log;
-	
+	short distance;
+	short correction;
 }Timer;
 
 typedef struct{
@@ -95,13 +98,14 @@ int Line1, Line2, Line3, Line4, SideL, SideR, Pot;
 int Def_ref;
 int total_encL, total_encR;
 int total_encL_memory, total_encR_memory;
-short total_encL_distance, total_encR_distance;
+int32_t total_encL_distance, total_encR_distance;
+int total_encL_reset, total_encR_reset;
 signed char enc_overL, enc_overR;
 
 int cycle_encL, cycle_encR;
 
 float robot_speed;
-float target_robot_speed;
+//float target_robot_speed;
 float speed_L, speed_R;
 float Def_speed_L, Def_speed_R;
 
@@ -123,7 +127,11 @@ int encorder_playback[MEMORY_ARRAY_SIZE];
 float speed_table[MEMORY_ARRAY_SIZE];
 
 float imu_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
-float pot_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
+float speed_table_distance[MEMORY_ARRAY_SIZE_DISTANCE];
+
+int32_t side_line_memory_R[SIDE_LINE_MEMORY_SIZE];
+int32_t side_line_memory_L[SIDE_LINE_MEMORY_SIZE];
+//float pot_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
 
 unsigned short max_abs_pot = 0;
 int retention_pot[RETENTION_ARRAY_SIZE];
@@ -144,8 +152,9 @@ float lowpassed_array[RETENTION_ARRAY_SIZE];
 char read_startgoal_line = 1;
 char read_side_line = 1;
 char a = 0, b = 0, c = 0;
-short max_access;
+float max_access;
 short data_access = 0;
+short data_access_dis = 0;
 int add_pot;
 float add_imu;
 
@@ -186,6 +195,8 @@ float average_sens1, average_sens2, average_sens3, average_sens4;
 
 //char fileName[][64] = {ENCORDER_LOG_TXT, IMU_LOG_TXT, POT_LOG_TXT};
 
+float imu_calibration = 0;
+
 #else
 /* 自動生成変数 (CubeMXから変更を加えた場合変える必要があるかも)-------------------------------------------------------------*/
 
@@ -217,13 +228,14 @@ extern int Line1, Line2, Line3, Line4, SideL, SideR, Pot;
 extern int Def_ref;
 extern int total_encL, total_encR;
 extern int total_encL_memory, total_encR_memory;
-extern short total_encL_distance, total_encR_distance;
+extern int32_t total_encL_distance, total_encR_distance;
+extern int total_encL_reset, total_encR_reset;
 extern signed char enc_overL, enc_overR;
 
 extern int cycle_encL, cycle_encR;
 
 extern float robot_speed;
-extern float target_robot_speed;
+//extern float target_robot_speed;
 extern float speed_L, speed_R;
 extern float Def_speed_L, Def_speed_R;
 
@@ -241,7 +253,11 @@ extern int encorder_playback[MEMORY_ARRAY_SIZE];
 extern float speed_table[MEMORY_ARRAY_SIZE];
 
 extern float imu_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
-extern float pot_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
+extern float speed_table_distance[MEMORY_ARRAY_SIZE_DISTANCE];
+
+extern int32_t side_line_memory_R[SIDE_LINE_MEMORY_SIZE];
+extern int32_t side_line_memory_L[SIDE_LINE_MEMORY_SIZE];
+//extern float pot_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
 
 extern unsigned short max_abs_pot;
 extern int retention_pot[RETENTION_ARRAY_SIZE];
@@ -264,8 +280,9 @@ extern float lowpassed_array[RETENTION_ARRAY_SIZE];
 extern char read_startgoal_line;
 extern char read_side_line;
 extern char a, b, c;
-extern short max_access;
+extern float max_access;
 extern short data_access;
+extern short data_access_dis;
 extern int add_pot;
 extern float add_imu;
 
@@ -303,5 +320,7 @@ extern float pid_val;
 extern float average_pot;
 extern float average_sens1, average_sens2, average_sens3, average_sens4;
 //extern char fileName[3];
+
+extern float imu_calibration;
 
 #endif

@@ -35,9 +35,14 @@ uint8_t IMU_init() {
 		write_byte(0x06,0x01);	//PWR_MGMT_1	スリープﾓｰﾄﾞ解除
 		write_byte(0x03,0x10);	//USER_CTRL	諸々機能無効　SPIonly
 		write_byte(0x7F,0x20);	//USER_BANK2
-		write_byte(0x01,0x06);	//レンジ±2000dps
+
+		//write_byte(0x01,0x06);	//	レンジ±2000dps DLPF disable
+		//write_byte(0x01,0x07);	//range±2000dps DLPF enable DLPFCFG = 0
+		//write_byte(0x01,0x0F);	//range±2000dps DLPF enable DLPFCFG = 1
+		write_byte(0x01,0x17);	//range±2000dps DLPF enable DLPFCFG = 2
+
 		//2:1 GYRO_FS_SEL[1:0] 00:±250	01:±500 10:±1000 11:±2000
-		write_byte(0x14,0x06);	//レンジ±16g
+		write_byte(0x14,0x06);	//	レンジ±16g
 		//2:1 ACCEL_FS_SEL[1:0] 00:±2	01:±4 10:±8 11:±16
 		write_byte(0x7F,0x00);	//USER_BANK0
 	}

@@ -16,7 +16,7 @@ char R_SW(void);
 int getEncorder_L(void);
 int getEncorder_R(void);
 void enc_reset(void);
-void updata_enc_cnt(int *, int *, int *, int *, short *, short *);
+void updata_enc_cnt(int *, int *, int *, int *, int32_t *, int32_t *, int *, int *);
 char debug_lcd(void);
 void updata_ADval(void);
 char vcm_kill(char, float);
@@ -58,6 +58,7 @@ void accelerator(char, float);
 float getRadius(void);
 short course_memory(char);
 void updata_robot_speed(char);
+void updata_robot_speed_distance(char);
 void store_imu_data(char, short *);
 void store_log_data(char);
 void store_pot_data(char, short *);
@@ -66,11 +67,11 @@ void lowpass_filter(float *, float *, short, float, float, float);
 float maximam(float *, short );
 void create_speed_table(void);
 void create_speed_table_2(void);
-void create_speed_table_distance(void);
 void create_speed_table_func(void);
 void mesurment_reset(void);
 
 char encorder_correction(short, int);
+char encorder_correction_distance(char);
 
 short course_memory_const_distance(char enable);
 void updata_imu_data_lowpassed(void);
@@ -81,6 +82,8 @@ void calc_feed_forward(float, float, float, float *, float *);
 void updata_now_speed(float *, float *);
 
 float velocity_func(float);
+void fix_acceleration(void);
+short side_sensor_memory(char);
 
 
 

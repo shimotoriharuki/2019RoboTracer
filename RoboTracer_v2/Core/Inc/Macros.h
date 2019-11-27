@@ -24,9 +24,9 @@
 #define MM500_PER_MPP 28000				//ゴール後進む距離のパルス だいたい500+α[mm]
 //#define RAD_PER_AD 0.001363538
 #define LINE_SENSOR_THRESHOLD 500		//緊急停止用
-#define LINE_DIGITAL_THRESHOLD 500		//デジタル変換用
-#define SIDE_DIGITAL_THRESHOLD_LEFT 500		//デジタル変換用
-#define SIDE_DIGITAL_THRESHOLD_RIGHT 400		//デジタル変換用
+#define LINE_DIGITAL_THRESHOLD 500		//	デジタル変換用
+#define SIDE_DIGITAL_THRESHOLD_LEFT 300		//	デジタル変換用
+#define SIDE_DIGITAL_THRESHOLD_RIGHT 250		//	デジタル変換用
 
 #define START_ACCELERATION 100 			//[m/ss]	5
 #define NORMAL_ACCELERATION 100		//[m/ss]
@@ -43,10 +43,12 @@
 #define DATA_SIZE1 7	//adの配列数
 #define DATA_SIZE2 3
 #define DEF_ARRAY_SIZE 128 //デフ格納配列の要素数
-#define MEMORY_ARRAY_SIZE 1000
-#define MEMORY_ARRAY_SIZE_2 1500
-#define MEMORY_ARRAY_SIZE_DISTANCE 000
-#define RETENTION_ARRAY_SIZE 1000
+#define MEMORY_ARRAY_SIZE 0
+#define MEMORY_ARRAY_SIZE_2 0
+#define MEMORY_ARRAY_SIZE_DISTANCE 6000
+#define SIDE_LINE_MEMORY_SIZE 100
+
+#define RETENTION_ARRAY_SIZE 0
 #define DECELERATION_DISTANCE 500 //[mm]//500
 #define CONTINUED_DISTANCE 60
 
@@ -82,10 +84,11 @@
 #define RAD_PER_AD (DEG160_TO_RAD / AD_RESOLUTION)
 #define TEST_SIZE 1
 
-#define COUNT_TO_RECORD 1.91121 //20[mm]	1123.91121
-#define R 0.4
+#define COUNT_TO_RECORD 562 //		10[mm]:561.9556055 		20[mm]:1123.91121
+#define R 0.1
 
-
+#define MAX_ACC 100 	//[mm/ss]
+#define MAX_DEC 100 		//[mm/ss]
 
 #define MACHINE_WEIGHT 0.205	//[kg]
 #define R_TIRE 0.011	//[m]
