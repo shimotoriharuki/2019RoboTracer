@@ -5,7 +5,7 @@
  #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 # endif /*__GNUC__*/
 
-//#define REVERCE_RUN	//逆走するときONにする
+#define REVERCE_RUN	//逆走するときONにする
  
 #define PI 3.1415926535
  
@@ -46,7 +46,7 @@
 #define MEMORY_ARRAY_SIZE 0
 #define MEMORY_ARRAY_SIZE_2 0
 #define MEMORY_ARRAY_SIZE_DISTANCE 6000
-#define SIDE_LINE_MEMORY_SIZE 100
+#define SIDE_LINE_MEMORY_SIZE 600
 
 #define RETENTION_ARRAY_SIZE 0
 #define DECELERATION_DISTANCE 500 //[mm]//500

@@ -572,7 +572,7 @@ char running_processing(){
 	if(cross_line_ignore == 0){
 		/*--------	スタート・ゴールマーカ---------*/
 #ifndef REVERCE_RUN
-		//通常周回
+		//	通常周回
 		if(getDigital('R') == 1 && getDigital('L') == 0 && read_startgoal_line == 1){
 			start_goal_cnt++;
 
@@ -587,7 +587,6 @@ char running_processing(){
 			//LED('N');
 		}
 		/*-------	サイドマーカー---------*/
-		//	通常周回
 		if(getDigital('R') == 0 && getDigital('L') == 1 && read_side_line == 1){
 			side_line_cnt++;
 			measurement_19mm_3(total_encL, total_encR, 0);
@@ -617,7 +616,7 @@ char running_processing(){
 		}
 
 #else
-		//	逆走周回
+		//	通常周回
 		if(getDigital('L') == 1 && getDigital('R') == 0 && read_startgoal_line == 1){
 			start_goal_cnt++;
 
@@ -626,20 +625,24 @@ char running_processing(){
 		}
 		else if(read_startgoal_line == 0){
 			read_startgoal_line = measurement_19mm_2(total_encL, total_encR, 0);
-			//LED('G');
+			//LED('R');
 		}
 		else{
-			//LED('W');
+			//LED('N');
 		}
-		//	逆走周回
+		/*-------	サイドマーカー---------*/
 		if(getDigital('L') == 0 && getDigital('R') == 1 && read_side_line == 1){
 			side_line_cnt++;
 			measurement_19mm_3(total_encL, total_encR, 0);
 			read_side_line = 0;
-			max_access = course_memory(flag.course_memory);	//	エンコーダ値と半径を記録
+			flag.side = 1;
+			//max_access = course_memory(flag.course_memory);	//	エンコーダ値と半径を記録
+
+			max_access = side_sensor_memory(flag.course_memory_distance);
+			encorder_correction_distance(flag.record_running_enable);
 		}
 		else if(read_side_line == 0){
-			if(getDigital('R') == 0 && getDigital('L') == 0){	//	マーカーが白から黒になったら
+			if(getDigital('L') == 0 && getDigital('R') == 0){	//	マーカーが白から黒になったら
 				side_off_cnt++;
 			}
 			else side_off_cnt = 0;
@@ -647,13 +650,13 @@ char running_processing(){
 			//if(measurement_19mm_3(total_encL, total_encR) || side_off_cnt >= 2){
 			if(side_off_cnt >= 2){
 				read_side_line = 1;
-				//course_memory();	//	エンコーダ値と半径を記録
+				flag.side = 0;
 			}
 
 			//LED('R');
 		}
 		else{
-			//LED('W');
+			//LED('N');
 		}
 #endif
 	}
@@ -661,9 +664,9 @@ char running_processing(){
 	if(flag.error)	LED('M');
 
 
-	gain.kp = 9;	//12
+	gain.kp = 11;	//12
 	gain.ki = 0;
-	gain.kd = 0.4;	//0.6
+	gain.kd = 0.45;	//0.6
 
 	/*//	速度を変えるやつ
 	if(flag.record_running_enable == 1){
@@ -1611,7 +1614,7 @@ char encorder_correction_distance(char enable){
 		while(Flag){
 			ave_memory = (side_line_memory_L[line_access] + side_line_memory_R[line_access]) / 2;
 
-			if((ave_now - 1300 < ave_memory) && (ave_memory < ave_now + 1300)){
+			if((ave_now - 1500 < ave_memory) && (ave_memory < ave_now + 1500)){
 				total_encL_distance = side_line_memory_L[line_access];
 				total_encR_distance = side_line_memory_R[line_access];
 				ret = 1;
@@ -3020,21 +3023,22 @@ float speed_select(){
 				*/
 
 				//--------------------------------------------------------
-				case 2:	//速いやつ
+				case 2:	//	速いやつ
 					lcd_clear();
 					lcd_locate(0,0);
 					lcd_printf("SPEED");
 					lcd_locate(0,1);
-					lcd_printf("memory");
+					lcd_printf("1400mm/s");
 
 					speed = speed_table[0];
+					if(SW(1)){	//long
+						LED('M');
 
-					if(SW(2)){
-						create_speed_table_2();
-						//flag.record_running_enable = 1;
+						sd_read_array("replay", "radius_long_reverce.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
+						create_speed_table_func();
 						flag.speed_updata = 1;
 
-						LED('M');
+
 						HAL_Delay(1000);
 						/*
 						for(short i = 0; i < max_access; i++){
@@ -3042,10 +3046,20 @@ float speed_select(){
 						}
 						*/
 					}
-					/*
-					if(flag.speed_updata)	LED('M');
-					else LED('C');
-					*/
+					if(SW(2)){	//short
+						LED('M');
+
+						//sd_read_array("replay", "radius_short.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
+						create_speed_table_func();
+						flag.speed_updata = 1;
+
+						HAL_Delay(1000);
+						/*
+						for(short i = 0; i < max_access; i++){
+							printf("%d		%f\r\n", i, speed_table[i]);
+						}
+						*/
+					}
 					LED('R');
 
 				break;
