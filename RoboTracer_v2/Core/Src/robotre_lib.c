@@ -438,7 +438,6 @@ void debug_pcprintf(){
 	//printf("%4d %4d %4d %4d %4d %4d %4d\r\n", Line1, Line2, Line3, Line4, SideL, SideR, Def_ref);
 	//printf("imu : %f\r\n",xg_l);
 
-
 }
 
 //************************************************************************/
@@ -504,6 +503,7 @@ char running_processing(){
 
 			flag.course_memory_distance = 0;
 			flag.record_running_enable = 1;
+			flag.after_finish_sd_wtire = 0;
 		}
 	}
 
@@ -526,7 +526,7 @@ char running_processing(){
 		//LED('N');
 	}
 
-	if(yaw_angle < 0.01 && yaw_angle > -0.01){
+	if(yaw_angle < 0.006 && yaw_angle > -0.006){
 		straight_cnt++;
 	}
 	else{
@@ -616,7 +616,7 @@ char running_processing(){
 		}
 
 #else
-		//	通常周回
+		//	逆走周回
 		if(getDigital('L') == 1 && getDigital('R') == 0 && read_startgoal_line == 1){
 			start_goal_cnt++;
 
@@ -664,9 +664,9 @@ char running_processing(){
 	if(flag.error)	LED('M');
 
 
-	gain.kp = 11;	//12
-	gain.ki = 0;
-	gain.kd = 0.45;	//0.6
+	gain.kp = 12.5;	//11, 12
+	gain.ki = 30;
+	gain.kd = 0.63;	//0.45, 0.6
 
 	/*//	速度を変えるやつ
 	if(flag.record_running_enable == 1){
@@ -751,7 +751,7 @@ char running_processing(){
 
 	/*----------------ゴール判定-------------------*/
 
-	if(start_goal_cnt >= 2)	ret = 1;
+	if(start_goal_cnt >= 3)	ret = 1;
 	//if((total_encL + total_encR) / 2 >= 95000)	ret = 1;
 	//if(flag.log_store == 0) ret = 1;
 	if(flag.error == 1)	ret = -1;
@@ -979,6 +979,7 @@ void flag_set(){
 	flag.speed_ctrl_enable = 1;
 	flag.sd_record  = 1;
 	flag.log_store = 1;
+	flag.after_finish_sd_wtire = 1;
 
 
 	//SD
@@ -1213,18 +1214,27 @@ void create_speed_table_func(){
 		//speed_table_distance[access] = velocity_func(temp);
 
 		if(temp < 250){
-			speed_table_distance[access] = 1500;
+			speed_table_distance[access] = 1300;
 		}
 		if(temp < 350){
-			speed_table_distance[access] = 1500;
+			speed_table_distance[access] = 1350;
 		}
 		else if(temp < 500){
-			speed_table_distance[access] = 1700;
+			speed_table_distance[access] = 1400;
 		}
-		else if(temp < 1500){
-			speed_table_distance[access] = 3500;
+		else if(temp < 800){
+			speed_table_distance[access] = 1500;
 		}
-		else if(temp < 3500){
+		else if(temp < 900){
+			speed_table_distance[access] = 1500;
+		}
+		else if(temp < 1200){
+			speed_table_distance[access] = 4500;
+		}
+		else if(temp < 2000){
+			speed_table_distance[access] = 5000;
+		}
+		else if(temp < 3000){
 			speed_table_distance[access] = 5000;
 		}
 		else if(temp < 5000){
@@ -1235,7 +1245,7 @@ void create_speed_table_func(){
 		}
 
 		if(speed_table_distance[access] > 5000) speed_table_distance[access] = 5000;
-		if(speed_table_distance[access] < 1000) speed_table_distance[access] = 1000;
+		if(speed_table_distance[access] < 1300) speed_table_distance[access] = 1300;
 	}
 
 	sd_write_array("speed_plan", "original.txt", MEMORY_ARRAY_SIZE_DISTANCE, speed_table_distance, OVER_WRITE);
@@ -1614,7 +1624,7 @@ char encorder_correction_distance(char enable){
 		while(Flag){
 			ave_memory = (side_line_memory_L[line_access] + side_line_memory_R[line_access]) / 2;
 
-			if((ave_now - 1500 < ave_memory) && (ave_memory < ave_now + 1500)){
+			if((ave_now - 700 < ave_memory) && (ave_memory < ave_now + 700)){
 				total_encL_distance = side_line_memory_L[line_access];
 				total_encR_distance = side_line_memory_R[line_access];
 				ret = 1;
@@ -2294,7 +2304,7 @@ void mesurment_reset(){
 //************************************************************************/
 void sensor_following(char flag){
 	float input_vcm = 0;
-	float kp = 1.8, ki  = 10, kd = 0.004;	//3s first float kp = 1, ki  = 0, kd = 0.001; 2sbeforer float kp = 2.0, ki  = 10, kd = 0.004; 2s
+	float kp = 1.6, ki  = 10, kd = 0.004;	//3s first float kp = 1, ki  = 0, kd = 0.001; 2sbeforer float kp = 2.0, ki  = 10, kd = 0.004; 2s
 	float p = 0, d = 0, i = 0;
 	float devi = 0;
 	static float pre_devi;
@@ -2541,14 +2551,16 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 	float devi_L = 0, devi_R = 0, devi = 0;
 	static float pre_devi_L = 0, pre_devi_R = 0, pre_devi = 0;
 	float speed = 0;
-	static short cntL, cntR;
 
-	static float pre_speed_L, pre_speed_R;
-
-	static float pre_robot_speed = 0;
-
+	static short cnt;
+	static float pre_speed;
 	static char dec = 0;
-	static short dec_cnt = 0;
+	static int pre_encorder = 0;
+	int ave_encorder = 0;
+
+	//static float pre_robot_speed = 0;
+
+
 
 	if(enable){
 
@@ -2570,6 +2582,7 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 			targetR *= 1.1;
 		}
 */
+		/*
 		devi_L = targetL - _now_speed_L;
 		p_L = devi_L * kp;
 		i_L += devi_L * DELTA_T * ki;
@@ -2579,46 +2592,93 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 		p_R = devi_R * kp;
 		i_R += devi_R * DELTA_T * ki;
 		//d_R = kd * (devi_R - pre_devi_R) / DELTA_T;
-
+		*/
 
 		devi = target - speed;
 		p = devi * kp;
 		i += devi * DELTA_T * ki;
 		//d = kd * (devi - pre_devi) / DELTA_T;
 
-
+/*
 		if(i_R > I_LIMIT)	i_R = I_LIMIT;
 		else if(i_R < -I_LIMIT)	i_R = -I_LIMIT;
 		if(i_L > I_LIMIT)	i_L = I_LIMIT;
 		else if(i_L < -I_LIMIT)	i_L = -I_LIMIT;
-
+*/
 		if(i > I_LIMIT)	i = I_LIMIT;
 		else if(i < -I_LIMIT)	i = -I_LIMIT;
-/*
+
 //------------------------FF--------------------------//
-		if(_now_speed_L >= targetL - 200 && _now_speed_L <= targetL + 200){//目標に近づいたら
+		/*
+		//ave_encorder = (total_encL_distance + total_encR_distance) / 2;
+
+		if((target - pre_speed) < -800 && dec == 0){	//減速　かつ　現在速度が目標より速いとき
+			dec = 1;
+			//pre_encorder = ave_encorder;
+			ff_duty = -3000.;
+		}
+		else{
+			pre_speed = target;
+		}
+
+		if(dec == 1){
+			/
+			if(ave_encorder - pre_encorder > 200){
+				dec = 0;
+				ff_duty = 0.;
+			}
+			/
+
+			if(speed <= target + 200){
+				cnt++;
+			}
+			else{
+				cnt = 0;
+			}
+
+
+			if(cnt >= 10){
+				dec = 0;
+				cnt = 0;
+				ff_duty = 0.;
+			}
+
+		}
+
+
+
+		if(ff_duty == -3000.){
+			LED('R');
+		}
+		else{
+			LED('N');
+		}
+		*/
+		//calc_feed_forward(ff_accele_L, ff_accele_R, 0, &ff_duty_L, &ff_duty_R);
+
+/*
+		if(_now_speed_L >= targetL - 100 && _now_speed_L <= targetL + 100){//目標に近づいたら
 			cntL++;
 		}
 		else{
 			cntL = 0;
 		}
 
-		if(cntL >= 10){
+		if(cntL >= 10){	//目標値付近
 			ff_accele_L = 0;
 			i_L = 0;
 			cntL = 0;
 		}
-		else if(fabs(pre_speed_L - targetL) > 500){
+		else if(fabs(pre_speed_L - targetL) > 100){
 			if(_now_speed_L > targetL){	//目標値より高い場合
 				ff_accele_L = -10;
 			}
 			else if(_now_speed_L < targetL) {//目標値より低い場合
 				ff_accele_L = 10;
 			}
-			//i_L = 0;
 		}
 
-		if(_now_speed_R >= targetR - 200 && _now_speed_R <= targetR + 200){
+		if(_now_speed_R >= targetR - 100 && _now_speed_R <= targetR + 100){
 			cntR++;
 		}
 		else{
@@ -2630,7 +2690,7 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 			i_R = 0;
 			cntR = 0;
 		}
-		else if(fabs(pre_speed_R - targetR) > 500){
+		else if(fabs(pre_speed_R - targetR) > 100){
 			if(_now_speed_R > targetR){	//目標値より高い場合
 				ff_accele_R = -10;
 			}
@@ -2644,9 +2704,9 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 		pre_speed_R = targetR;
 
 		calc_feed_forward(ff_accele_L, ff_accele_R, 0, &ff_duty_L, &ff_duty_R);
-
-//--------------------------------------------------//
 */
+//--------------------------------------------------//
+
 	/*
 		if(((pre_speed_L + pre_speed_R)/2) - ((targetL + targetR)/2) > 100){
 			ff_duty_L = ff_duty_R = -2000;
@@ -2693,19 +2753,19 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 
 		pre_robot_speed = robot_speed;
 */
-		input_L = ((p_L + i_L) + ff_duty_L);
-		input_R = ((p_R + i_R) + ff_duty_R);
+		//input_L = ((p_L + i_L) + ff_duty_L);
+		//input_R = ((p_R + i_R) + ff_duty_R);
 		//input_L = (p_L + i_L);
 		//input_R = (p_R + i_R);
 		//input_L = 1200;
 		//input_R = 1200;
 
-		*val = p + i +  + ff_duty_L ;
-
+		*val = p + i + ff_duty;
+/*
 		pre_devi_L = devi_L;
 		pre_devi_R = devi_R;
 		pre_devi = devi;
-
+*/
 		//maxon_ctrl(input_L, input_R);
 	}
 }
@@ -2970,7 +3030,7 @@ float speed_select(){
 		timer.lcd = 0;
 		switch(R_SW()){
 			//--------------------------------------------------------
-				case 0:	//	普通のやつ
+				case 0:	//	記録後に走行
 
 					lcd_clear();
 					lcd_locate(0,0);
@@ -2978,7 +3038,7 @@ float speed_select(){
 					lcd_locate(0,1);
 					lcd_printf("memory");
 
-					speed = 500;
+					speed = 4000;
 
 					if(SW(2)){
 						//create_speed_table();
@@ -3023,21 +3083,22 @@ float speed_select(){
 				*/
 
 				//--------------------------------------------------------
-				case 2:	//	速いやつ
+				case 2:	//引継ぎ走行
 					lcd_clear();
 					lcd_locate(0,0);
 					lcd_printf("SPEED");
 					lcd_locate(0,1);
 					lcd_printf("1400mm/s");
 
-					speed = speed_table[0];
+					speed = 4000;
 					if(SW(1)){	//long
 						LED('M');
+						sd_read_array_int("Take_over", "side_line_memory_L.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_L);
+						sd_read_array_int("Take_over", "side_line_memory_R.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_R);
+						sd_read_array("Take_over", "radius.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
 
-						sd_read_array("replay", "radius_long_reverce.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
 						create_speed_table_func();
 						flag.speed_updata = 1;
-
 
 						HAL_Delay(1000);
 						/*
@@ -3082,21 +3143,20 @@ float speed_select(){
 				break;
 				*/
 				//--------------------------------------------------------
-				case 4:
+				case 4:	//	読み出し走行
 					lcd_clear();
 					lcd_locate(0,0);
 					lcd_printf("SPEED");
 					lcd_locate(0,1);
 					lcd_printf("1400mm/s");
 
-					speed = 500;
+					speed = 4000;
 					if(SW(1)){	//long
 						LED('M');
 
 						sd_read_array("replay", "radius_long.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
 						create_speed_table_func();
 						flag.speed_updata = 1;
-
 
 						HAL_Delay(1000);
 						/*
@@ -3108,7 +3168,10 @@ float speed_select(){
 					if(SW(2)){	//short
 						LED('M');
 
-						sd_read_array("replay", "radius_short.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
+						sd_read_array("replay", "radius_long2.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
+						sd_read_array_int("replay", "side_line_memory_L_long2.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_L);
+						sd_read_array_int("replay", "side_line_memory_R_long2.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_R);
+
 						create_speed_table_func();
 						flag.speed_updata = 1;
 
@@ -3140,7 +3203,7 @@ float speed_select(){
 				break;
 				*/
 				//--------------------------------------------------------
-				case 6:	//	遅いやつ
+				case 6:	//	記録
 					lcd_clear();
 					lcd_locate(0,0);
 					lcd_printf("SPEED");

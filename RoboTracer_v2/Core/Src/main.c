@@ -330,6 +330,14 @@ int main(void)
 				flag.record_running_enable = 0;
 				flag.course_memory = 0;
 				flag.pot_store = 0;
+				if(flag.after_finish_sd_wtire){
+					LED('M');
+					sd_write_array("Take_over", "line_nubmber.txt", 1, &max_access, OVER_WRITE);
+					sd_write_array_int("Take_over", "side_line_memory_L.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_L, OVER_WRITE);
+					sd_write_array_int("Take_over", "side_line_memory_R.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_R, OVER_WRITE);
+					sd_write_array("Take_over", "radius.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance, OVER_WRITE);
+					flag.after_finish_sd_wtire = 0;
+				}
 
 				if(SW(1)){
 					//lowpass_filter(imu_data, lowpassed_pot, 10000, FREQ, SAMPLERATE, Q);

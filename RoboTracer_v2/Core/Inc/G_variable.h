@@ -34,6 +34,7 @@ typedef struct {
 	char sd_record;
 	char start_line_flag;
 	char yaw_zero;
+	char after_finish_sd_wtire;
 }Flag;
 
 typedef struct{
@@ -129,8 +130,8 @@ float speed_table[MEMORY_ARRAY_SIZE];
 float imu_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
 float speed_table_distance[MEMORY_ARRAY_SIZE_DISTANCE];
 
-int32_t side_line_memory_R[SIDE_LINE_MEMORY_SIZE];
-int32_t side_line_memory_L[SIDE_LINE_MEMORY_SIZE];
+int side_line_memory_R[SIDE_LINE_MEMORY_SIZE];
+int side_line_memory_L[SIDE_LINE_MEMORY_SIZE];
 //float pot_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
 
 unsigned short max_abs_pot = 0;
@@ -184,7 +185,7 @@ float alpha_x_l, alpha_y_l, alpha_z_l;
 float yaw_angle;
 
 float ff_accele_L, ff_accele_R;
-float ff_duty_L, ff_duty_R;
+int ff_duty_L, ff_duty_R, ff_duty;
 
 //float now_speed_L, now_speed_R;
 
@@ -255,8 +256,8 @@ extern float speed_table[MEMORY_ARRAY_SIZE];
 extern float imu_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
 extern float speed_table_distance[MEMORY_ARRAY_SIZE_DISTANCE];
 
-extern int32_t side_line_memory_R[SIDE_LINE_MEMORY_SIZE];
-extern int32_t side_line_memory_L[SIDE_LINE_MEMORY_SIZE];
+extern int side_line_memory_R[SIDE_LINE_MEMORY_SIZE];
+extern int side_line_memory_L[SIDE_LINE_MEMORY_SIZE];
 //extern float pot_radius_memory_distance[MEMORY_ARRAY_SIZE_DISTANCE];
 
 extern unsigned short max_abs_pot;
@@ -311,7 +312,7 @@ extern float alpha_x_l, alpha_y_l, alpha_z_l;
 extern float yaw_angle;
 
 extern float ff_accele_L, ff_accele_R;
-extern float ff_duty_L, ff_duty_R;
+extern int ff_duty_L, ff_duty_R, ff_duty;
 
 //extern float now_speed_L, now_speed_R;
 

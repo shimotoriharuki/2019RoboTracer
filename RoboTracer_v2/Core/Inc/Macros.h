@@ -5,7 +5,7 @@
  #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 # endif /*__GNUC__*/
 
-#define REVERCE_RUN	//逆走するときONにする
+//#define REVERCE_RUN	//逆走するときONにする
  
 #define PI 3.1415926535
  
@@ -75,7 +75,7 @@
 #define HIGH_SPEED_DISTANCE 6000	//6000
 #define COMM_H_SPEED_DISTANCE 3000	//2000	R30
 #define COMM_L_SPEED_DISTANCE 2000	//2000	R15-R20
-#define LOW_SPEED_DISTANCE 1400	//1450	R10
+#define LOW_SPEED_DISTANCE 1100	//1450	R10
 
 #define ROTATION_POINT_FROM_AXEL 39.5	//39.5 ~ 51.5 45.5よさげ 　33.5 だめ
 #define TRED 112.	//[mm]112 124
@@ -85,10 +85,10 @@
 #define TEST_SIZE 1
 
 #define COUNT_TO_RECORD 562 //		10[mm]:561.9556055 		20[mm]:1123.91121
-#define R 0.1
+#define R 0.06
 
-#define MAX_ACC 100 	//[mm/ss]
-#define MAX_DEC 100 		//[mm/ss]
+#define MAX_ACC 40 	//[mm/ss]
+#define MAX_DEC 55 		//[mm/ss]
 
 #define MACHINE_WEIGHT 0.205	//[kg]
 #define R_TIRE 0.011	//[m]
