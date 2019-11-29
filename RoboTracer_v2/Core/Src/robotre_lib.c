@@ -37,15 +37,15 @@ char debug_lcd(){
 		//--------------------------------------------------------
 		switch(R_SW()){
 			case 0:
-				/*
+
 				lcd_clear();
 				lcd_locate(0,0);
 				lcd_printf("%4d%4d", Line2, Line3);
 				lcd_locate(0,1);
 				lcd_printf("%4d%4d", Line1, Line4);
 				LED('B');
-				*/
 
+/*
 				if(SW(1)){
 					LED('R');
 					for(short i = 0; i < 2000; i++){
@@ -61,7 +61,7 @@ char debug_lcd(){
 				lcd_locate(0,1);
 				lcd_printf("%f", yaw_angle);
 				LED('B');
-
+*/
 				if(SW(1)){//
 					//sd_write(FOLDER_0, IMU_LOG1, MEMORY_ARRAY_SIZE_2, radius_memory_2, OVER_WRITE);
 					//sd_write(FOLDER_0, IMU_LOG2, MEMORY_ARRAY_SIZE_2, radius_memory_3, OVER_WRITE);
@@ -664,9 +664,17 @@ char running_processing(){
 	if(flag.error)	LED('M');
 
 
-	gain.kp = 12.5;	//11, 12
-	gain.ki = 30;
-	gain.kd = 0.63;	//0.45, 0.6
+	if(flag.record_running_enable == 1){
+		gain.kp = 13.5;	//11, 12
+		gain.ki = 10;
+		gain.kd = 0.62;	//0.45, 0.6
+
+	}
+	else{
+		gain.kp = 12;	//3.3
+		gain.ki = 10;
+		gain.kd = 0.63;	//0.075
+	}
 
 	/*//	速度を変えるやつ
 	if(flag.record_running_enable == 1){
@@ -751,7 +759,7 @@ char running_processing(){
 
 	/*----------------ゴール判定-------------------*/
 
-	if(start_goal_cnt >= 3)	ret = 1;
+	if(start_goal_cnt >= 2)	ret = 1;
 	//if((total_encL + total_encR) / 2 >= 95000)	ret = 1;
 	//if(flag.log_store == 0) ret = 1;
 	if(flag.error == 1)	ret = -1;
@@ -1216,19 +1224,22 @@ void create_speed_table_func(){
 		if(temp < 250){
 			speed_table_distance[access] = 1300;
 		}
-		if(temp < 350){
-			speed_table_distance[access] = 1350;
+		else if(temp < 350){
+			speed_table_distance[access] = 1300;
 		}
 		else if(temp < 500){
-			speed_table_distance[access] = 1400;
+			speed_table_distance[access] = 1300;
 		}
 		else if(temp < 800){
 			speed_table_distance[access] = 1500;
 		}
-		else if(temp < 900){
+		else if(temp < 1100){
 			speed_table_distance[access] = 1500;
 		}
-		else if(temp < 1200){
+		else if(temp < 1300){
+			speed_table_distance[access] = 2000;
+		}
+		else if(temp < 1400){
 			speed_table_distance[access] = 4500;
 		}
 		else if(temp < 2000){
@@ -1246,6 +1257,69 @@ void create_speed_table_func(){
 
 		if(speed_table_distance[access] > 5000) speed_table_distance[access] = 5000;
 		if(speed_table_distance[access] < 1300) speed_table_distance[access] = 1300;
+	}
+
+	sd_write_array("speed_plan", "original.txt", MEMORY_ARRAY_SIZE_DISTANCE, speed_table_distance, OVER_WRITE);
+
+	fix_acceleration();
+
+	sd_write_array("speed_plan", "fixed.txt", MEMORY_ARRAY_SIZE_DISTANCE, speed_table_distance, OVER_WRITE);
+}
+
+
+//************************************************************************/
+//* 役割　：　記憶したポテンショの値から速度を配列に打ち込む　速いバージョン
+//* 引数　：　void:
+//* 戻り値：　void:
+//* 備考 :
+//************************************************************************/
+void create_speed_table_func_2(){
+	float temp = 0;
+	int access = 0;
+
+	for(access = 0; access < MEMORY_ARRAY_SIZE_DISTANCE; access++){
+		temp = imu_radius_memory_distance[access];
+		if(temp < 0){
+			temp *= -1;
+		}
+		//speed_table_distance[access] = velocity_func(temp);
+
+		if(temp < 250){
+			speed_table_distance[access] = 1450;
+		}
+		else if(temp < 350){
+			speed_table_distance[access] = 1450;
+		}
+		else if(temp < 500){
+			speed_table_distance[access] = 1500;
+		}
+		else if(temp < 700){
+			speed_table_distance[access] = 1600;
+		}
+		else if(temp < 800){
+			speed_table_distance[access] = 1800;
+		}
+		else if(temp < 1250){
+			speed_table_distance[access] = 5000;
+		}
+		else if(temp < 1400){
+			speed_table_distance[access] = 5000;
+		}
+		else if(temp < 2000){
+			speed_table_distance[access] = 5000;
+		}
+		else if(temp < 3000){
+			speed_table_distance[access] = 5000;
+		}
+		else if(temp < 5000){
+			speed_table_distance[access] = 5000;
+		}
+		else{
+			speed_table_distance[access] = 5000;
+		}
+
+		if(speed_table_distance[access] > 5000) speed_table_distance[access] = 5000;
+		if(speed_table_distance[access] < 1450) speed_table_distance[access] = 1450;
 	}
 
 	sd_write_array("speed_plan", "original.txt", MEMORY_ARRAY_SIZE_DISTANCE, speed_table_distance, OVER_WRITE);
@@ -1557,7 +1631,7 @@ void updata_imu_data_lowpassed(){
 	alpha_y_l = lowpass_filter_simple(alpha_y, pre_ya, R);
 	alpha_z_l = lowpass_filter_simple(alpha_z, pre_za, R);
 
-	omega_z_l -= imu_calibration;
+	//omega_z_l -= imu_calibration;
 	yaw_angle += omega_z_l * DELTA_T;
 
 	pre_xg = omega_x_l;
@@ -1624,7 +1698,7 @@ char encorder_correction_distance(char enable){
 		while(Flag){
 			ave_memory = (side_line_memory_L[line_access] + side_line_memory_R[line_access]) / 2;
 
-			if((ave_now - 700 < ave_memory) && (ave_memory < ave_now + 700)){
+			if((ave_now - 1000 < ave_memory) && (ave_memory < ave_now + 1000)){
 				total_encL_distance = side_line_memory_L[line_access];
 				total_encR_distance = side_line_memory_R[line_access];
 				ret = 1;
@@ -2304,7 +2378,7 @@ void mesurment_reset(){
 //************************************************************************/
 void sensor_following(char flag){
 	float input_vcm = 0;
-	float kp = 1.6, ki  = 10, kd = 0.004;	//3s first float kp = 1, ki  = 0, kd = 0.001; 2sbeforer float kp = 2.0, ki  = 10, kd = 0.004; 2s
+	float kp = 1.4, ki  = 10, kd = 0.003;	//float kp = 1.6, ki  = 10, kd = 0.004;, 3s first float kp = 1, ki  = 0, kd = 0.001; 2sbeforer float kp = 2.0, ki  = 10, kd = 0.004; 2s
 	float p = 0, d = 0, i = 0;
 	float devi = 0;
 	static float pre_devi;
@@ -2334,7 +2408,7 @@ void sensor_following(char flag){
 //************************************************************************/
 void angle_ctrl(char flag, short target_pot){
 	float input_vcm = 0;
-	float kp = 10, ki  = 0, kd = 0.1;
+	float kp = 10, ki  = 0, kd = 0.07; //float kp = 10, ki  = 0, kd = 0.1;
 	float p = 0, d = 0, i = 0;
 	float devi = 0;
 	static float pre_devi;
@@ -2542,7 +2616,7 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 	#define I_LIMIT 2000 //2000, 0.9, 150,
 
 	float input_L = 0, input_R = 0, input = 0;
-	float kp = 2, ki = 120, kd = 0;	// float kp = 1, ki = 150, kd = 0;, beforer float kp = 0.624, ki = 160 float kp = 0.9, ki = 9;float kp = 0.5, ki = 40, kd = 0.00010;
+	float kp = 1.7, ki = 140, kd = 0;	// float kp = 1, ki = 150, kd = 0;, beforer float kp = 0.624, ki = 160 float kp = 0.9, ki = 9;float kp = 0.5, ki = 40, kd = 0.00010;
 	float p_L = 0, p_R = 0, p = 0;
 	static float i_L = 0, i_R = 0, i = 0;
 	float d_L = 0, d_R = 0, d = 0;
@@ -3038,16 +3112,21 @@ float speed_select(){
 					lcd_locate(0,1);
 					lcd_printf("memory");
 
-					speed = 4000;
+					speed = speed_table_distance[0];
 
-					if(SW(2)){
-						//create_speed_table();
-						LED('M');
-
-						//flag.course_memory_distance = 0;
-						//flag.record_running_enable = 1;
+					if(SW(1)){
+						LED('B');
 
 						create_speed_table_func();
+						flag.speed_updata = 1;
+
+						HAL_Delay(1000);
+					}
+					if(SW(2)){
+						LED('M');
+
+
+						create_speed_table_func_2();
 						flag.speed_updata = 1;
 
 						HAL_Delay(1000);
@@ -3090,14 +3169,20 @@ float speed_select(){
 					lcd_locate(0,1);
 					lcd_printf("1400mm/s");
 
-					speed = 4000;
-					if(SW(1)){	//long
-						LED('M');
+					speed = speed_table_distance[0];
+					if(SW(1)){	//安全
+						LED('B');
 						sd_read_array_int("Take_over", "side_line_memory_L.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_L);
 						sd_read_array_int("Take_over", "side_line_memory_R.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_R);
 						sd_read_array("Take_over", "radius.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
+						/*
+						sd_write_array_int("check", "side_line_memory_L.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_L, OVER_WRITE);
+						sd_write_array_int("check", "side_line_memory_R.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_R, OVER_WRITE);
+						sd_write_array("check", "radius.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance, OVER_WRITE);
+						*/
 
 						create_speed_table_func();
+						//sd_write_array("check", "speed_table.txt", MEMORY_ARRAY_SIZE_DISTANCE, speed_table_distance, OVER_WRITE);
 						flag.speed_updata = 1;
 
 						HAL_Delay(1000);
@@ -3107,19 +3192,23 @@ float speed_select(){
 						}
 						*/
 					}
-					if(SW(2)){	//short
+					if(SW(2)){	//速い
 						LED('M');
+						sd_read_array_int("Take_over", "side_line_memory_L.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_L);
+						sd_read_array_int("Take_over", "side_line_memory_R.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_R);
+						sd_read_array("Take_over", "radius.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
 
-						//sd_read_array("replay", "radius_short.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance);
-						create_speed_table_func();
+						/*
+						sd_write_array_int("check", "side_line_memory_L.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_L, OVER_WRITE);
+						sd_write_array_int("check", "side_line_memory_R.txt", SIDE_LINE_MEMORY_SIZE, side_line_memory_R, OVER_WRITE);
+						sd_write_array("check", "radius.txt", MEMORY_ARRAY_SIZE_DISTANCE, imu_radius_memory_distance, OVER_WRITE);
+						*/
+
+						create_speed_table_func_2();
 						flag.speed_updata = 1;
 
 						HAL_Delay(1000);
-						/*
-						for(short i = 0; i < max_access; i++){
-							printf("%d		%f\r\n", i, speed_table[i]);
-						}
-						*/
+
 					}
 					LED('R');
 
@@ -3150,7 +3239,7 @@ float speed_select(){
 					lcd_locate(0,1);
 					lcd_printf("1400mm/s");
 
-					speed = 4000;
+					speed = speed_table_distance[0];
 					if(SW(1)){	//long
 						LED('M');
 

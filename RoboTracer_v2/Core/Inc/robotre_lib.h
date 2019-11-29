@@ -68,6 +68,7 @@ float maximam(float *, short );
 void create_speed_table(void);
 void create_speed_table_2(void);
 void create_speed_table_func(void);
+void create_speed_table_func_2(void);
 void mesurment_reset(void);
 
 char encorder_correction(short, int);
