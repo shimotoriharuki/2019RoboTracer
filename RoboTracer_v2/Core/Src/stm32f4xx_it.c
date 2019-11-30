@@ -331,12 +331,12 @@ void TIM7_IRQHandler(void)
 		average_sens2 = sum_sens2 / AVE_NUM;
 		average_sens3 = sum_sens3 / AVE_NUM;
 		average_sens4 = sum_sens4 / AVE_NUM;
-
+*/
 		sum_sens1 = 0;
 		sum_sens2 = 0;
 		sum_sens3 = 0;
 		sum_sens4 = 0;
-*/
+
 		sum_pot = 0;
 
 		ful_flag = 0;

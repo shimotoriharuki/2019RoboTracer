@@ -1222,6 +1222,43 @@ void create_speed_table_func(){
 		//speed_table_distance[access] = velocity_func(temp);
 
 		if(temp < 250){
+			speed_table_distance[access] = 1500;
+		}
+		else if(temp < 350){
+			speed_table_distance[access] = 1500;
+		}
+		else if(temp < 500){
+			speed_table_distance[access] = 1800;
+		}
+		else if(temp < 800){
+			speed_table_distance[access] = 2000;
+		}
+		else if(temp < 1100){
+			speed_table_distance[access] = 2200;
+		}
+		else if(temp < 1300){
+			speed_table_distance[access] = 3000;
+		}
+		else if(temp < 1400){
+			speed_table_distance[access] = 4500;
+		}
+		else if(temp < 2000){
+			speed_table_distance[access] = 5000;
+		}
+		else if(temp < 3000){
+			speed_table_distance[access] = 5000;
+		}
+		else if(temp < 5000){
+			speed_table_distance[access] = 5000;
+		}
+		else{
+			speed_table_distance[access] = 5000;
+		}
+
+		if(speed_table_distance[access] > 5000) speed_table_distance[access] = 5000;
+		if(speed_table_distance[access] < 1500) speed_table_distance[access] = 1500;
+/*
+		if(temp < 250){	//走るやつ
 			speed_table_distance[access] = 1300;
 		}
 		else if(temp < 350){
@@ -1257,6 +1294,7 @@ void create_speed_table_func(){
 
 		if(speed_table_distance[access] > 5000) speed_table_distance[access] = 5000;
 		if(speed_table_distance[access] < 1300) speed_table_distance[access] = 1300;
+*/
 	}
 
 	sd_write_array("speed_plan", "original.txt", MEMORY_ARRAY_SIZE_DISTANCE, speed_table_distance, OVER_WRITE);
@@ -1283,8 +1321,45 @@ void create_speed_table_func_2(){
 			temp *= -1;
 		}
 		//speed_table_distance[access] = velocity_func(temp);
+		 if(temp < 250){
+			speed_table_distance[access] = 1600;
+		}
+		else if(temp < 350){
+			speed_table_distance[access] = 1800;
+		}
+		else if(temp < 500){
+			speed_table_distance[access] = 2500;
+		}
+		else if(temp < 700){
+			speed_table_distance[access] = 2500;
+		}
+		else if(temp < 1000){
+			speed_table_distance[access] = 3200;
+		}
+		else if(temp < 1250){
+			speed_table_distance[access] = 6000;
+		}
+		else if(temp < 1400){
+			speed_table_distance[access] = 6000;
+		}
+		else if(temp < 2000){
+			speed_table_distance[access] = 6000;
+		}
+		else if(temp < 3000){
+			speed_table_distance[access] = 6000;
+		}
+		else if(temp < 5000){
+			speed_table_distance[access] = 6000;
+		}
+		else{
+			speed_table_distance[access] = 6000;
+		}
 
-		if(temp < 250){
+		if(speed_table_distance[access] > 6000) speed_table_distance[access] = 6000;
+		if(speed_table_distance[access] < 1600) speed_table_distance[access] = 1600;
+
+/*
+		if(temp < 250){	//走るやつ「
 			speed_table_distance[access] = 1450;
 		}
 		else if(temp < 350){
@@ -1320,11 +1395,12 @@ void create_speed_table_func_2(){
 
 		if(speed_table_distance[access] > 5000) speed_table_distance[access] = 5000;
 		if(speed_table_distance[access] < 1450) speed_table_distance[access] = 1450;
+*/
 	}
 
 	sd_write_array("speed_plan", "original.txt", MEMORY_ARRAY_SIZE_DISTANCE, speed_table_distance, OVER_WRITE);
 
-	fix_acceleration();
+	fix_acceleration_2();
 
 	sd_write_array("speed_plan", "fixed.txt", MEMORY_ARRAY_SIZE_DISTANCE, speed_table_distance, OVER_WRITE);
 }
@@ -1422,6 +1498,89 @@ void fix_acceleration(){
 			if(abs(now_acc) > MAX_DEC - 10){
 				speed_table_distance[i - 1] = speed_table_distance[i];
 				speed_temp = sqrt(MAX_DEC * LENGTH) + speed_temp;
+			}
+		}
+		else{
+			Flag = 0;
+		}
+
+	}
+
+
+}
+
+//************************************************************************/
+//* 役割　：　加速度修正 せめせめ
+//* 引数　：　void:
+//* 戻り値：　void:
+//* 備考 :
+//************************************************************************/
+void fix_acceleration_2(){
+	#define LENGTH 10 //[mm]
+	int i = 0, j = 0;
+	float vel_diff = 0;
+	float time = 0;
+	float now_acc = 0;
+	short cnt = 0;
+	float speed_temp = 0;
+	char Flag = 0;
+
+	speed_table_distance[0] = 1000.;
+
+	for(i = 0; i < MEMORY_ARRAY_SIZE_DISTANCE - 1; i++){
+		vel_diff = fabs(speed_table_distance[i + 1] - speed_table_distance[i]);
+		if(vel_diff != 0)
+			time = LENGTH / vel_diff;
+		else time = 999999;
+
+		now_acc = vel_diff / time;
+
+		if (abs(now_acc) > MAX_ACC_2 && speed_table_distance[i + 1] > speed_table_distance[i]){
+			speed_table_distance[i + 1] =  sqrt(MAX_ACC_2 * LENGTH) + speed_table_distance[i];
+		}
+	}
+
+	for(i = MEMORY_ARRAY_SIZE_DISTANCE - 1; i >= 0; i--){	//	ゆるやかに減速させる
+		vel_diff = fabs(speed_table_distance[i - 1] - speed_table_distance[i]);
+		if(vel_diff != 0)
+			time = LENGTH / vel_diff;
+		else time = 999999;
+		now_acc = vel_diff / time;
+
+		if (abs(now_acc) > MAX_DEC_2 && speed_table_distance[i - 1] > speed_table_distance[i]){
+			speed_table_distance[i - 1] =  sqrt(MAX_DEC_2 * LENGTH) + speed_table_distance[i];
+		}
+	}
+
+	for(i = MEMORY_ARRAY_SIZE_DISTANCE - 1; i >= 0; i--){
+		if(Flag == 0){
+			vel_diff = fabs(speed_table_distance[i - 1] - speed_table_distance[i]);
+		}
+		else{
+			vel_diff = fabs(speed_table_distance[i - 1] - speed_temp);
+		}
+
+		if(vel_diff != 0){
+			time = LENGTH / vel_diff;
+		}
+		else{
+			time = 999999;
+		}
+
+		now_acc = vel_diff / time;
+
+		if(speed_table_distance[i - 1] > speed_table_distance[i] && Flag == 0){//	減速するとき
+			if(abs(now_acc) > MAX_DEC_2 - 10){	//	加速が足りないとき
+				speed_table_distance[i - 1] = speed_table_distance[i];
+				speed_temp = sqrt(MAX_DEC_2 * LENGTH) + speed_table_distance[i];
+
+				Flag = 1;
+			}
+		}
+		else if(speed_table_distance[i - 1] > speed_temp && Flag == 1){
+			if(abs(now_acc) > MAX_DEC_2 - 10){
+				speed_table_distance[i - 1] = speed_table_distance[i];
+				speed_temp = sqrt(MAX_DEC_2 * LENGTH) + speed_temp;
 			}
 		}
 		else{
@@ -2378,7 +2537,7 @@ void mesurment_reset(){
 //************************************************************************/
 void sensor_following(char flag){
 	float input_vcm = 0;
-	float kp = 1.4, ki  = 10, kd = 0.003;	//float kp = 1.6, ki  = 10, kd = 0.004;, 3s first float kp = 1, ki  = 0, kd = 0.001; 2sbeforer float kp = 2.0, ki  = 10, kd = 0.004; 2s
+	float kp = 2.1, ki  = 10, kd = 0.003;	//float kp = 1.6, ki  = 10, kd = 0.004;, 3s first float kp = 1, ki  = 0, kd = 0.001; 2sbeforer float kp = 2.0, ki  = 10, kd = 0.004; 2s
 	float p = 0, d = 0, i = 0;
 	float devi = 0;
 	static float pre_devi;

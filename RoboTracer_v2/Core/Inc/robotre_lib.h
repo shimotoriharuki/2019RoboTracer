@@ -84,6 +84,7 @@ void updata_now_speed(float *, float *);
 
 float velocity_func(float);
 void fix_acceleration(void);
+void fix_acceleration_2(void);
 short side_sensor_memory(char);
 
 
