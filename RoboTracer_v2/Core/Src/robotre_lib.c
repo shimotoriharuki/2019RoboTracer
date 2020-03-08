@@ -19,7 +19,28 @@
 #include "HAL_SDcard_lib.h"
 
 #include "robotre_lib.h"
+#include <string.h>
 
+/*
+#define BUFF_SIZE 128
+
+FATFS myFatFS;  // file system
+FIL myFile; // File
+//FILINFO fno;
+//FRESULT fresult;  // result
+UINT br, bw;  // File read/write count
+UINT myBytes;
+
+char buffer[BUFF_SIZE];
+
+char myFileName[] = "TEST1.txt";
+char myData[] = "OK\r\n";
+#define DATA_SIZE_ 10000
+short data[DATA_SIZE_];
+short temp[DATA_SIZE_];
+*/
+
+short TargetCnt = 0;
 
 //************************************************************************/
 //* 役割　：　LCDでデバッグする関数
@@ -44,6 +65,77 @@ char debug_lcd(){
 				lcd_locate(0,1);
 				lcd_printf("%4d%4d", Line1, Line4);
 				LED('B');
+				if(SW(1)){	//m系列信号
+					LED('R');
+					HAL_Delay(300);
+
+					flag.angle_enable = 1;
+					flag.log_store = 1;
+
+					for(int16_t i = 0; i < M_LEN; i++){
+						int16_t pulsewidth = 300;
+						int16_t in = pulsewidth * msig[i];
+						check_in = in;
+						maxon_ctrl(in, in);
+						HAL_Delay(350);
+					}
+
+					LED('B');
+
+					//HAL_Delay(3000);
+
+					flag.angle_enable = 0;
+					flag.log_store = 0;
+
+					//vcm_ctrl(0, &monitoring_vcm_pulse_width);
+					maxon_ctrl(0, 0);
+
+					//sd_write_array("Angle log", "Angle.txt", ANGLE_ARRAY_DATA, angle_array, OVER_WRITE);
+					//sd_write_array("Encorder log", "left_M.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					sd_write_array("Translation Log", "output.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					sd_write_array("Translation Log", "input.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
+				}
+				else if(SW(2)){	//	同定後チェック
+					LED('R');
+					HAL_Delay(300);
+					flag.art = 1;
+					TargetOmega = 0;
+					/*
+					flag.speed_ctrl_enable = 1;
+					flag.log_store = 1;
+					robot_speed = 500;
+					HAL_Delay(1000);
+
+					robot_speed = 1500;
+					HAL_Delay(1000);
+
+					robot_speed = 1000;
+					HAL_Delay(1000);
+
+					flag.speed_ctrl_enable = 0;
+					flag.log_store = 0;
+					robot_speed = 0;
+					maxon_ctrl(0, 0);
+					sd_write_array("Translation Log", "speed50015001000.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					*/
+				}
+
+				else if(SW(3)){	//	プリ同定
+					LED('R');
+					HAL_Delay(300);
+
+					flag.log_store = 1;
+
+					maxon_ctrl(300, 300);
+
+					HAL_Delay(4000);
+
+					flag.log_store = 0;
+
+					maxon_ctrl(0, 0);
+
+					sd_write_array("Translation Log", "pre_velo.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+				}
 
 /*
 				if(SW(1)){
@@ -62,12 +154,14 @@ char debug_lcd(){
 				lcd_printf("%f", yaw_angle);
 				LED('B');
 */
+				/*
 				if(SW(1)){//
 					//sd_write(FOLDER_0, IMU_LOG1, MEMORY_ARRAY_SIZE_2, radius_memory_2, OVER_WRITE);
 					//sd_write(FOLDER_0, IMU_LOG2, MEMORY_ARRAY_SIZE_2, radius_memory_3, OVER_WRITE);
 					printf("sd_write\r\n");
 
 				}
+				*/
 
 			break;
 			/*
@@ -109,11 +203,90 @@ char debug_lcd(){
 			*/
 			//--------------------------------------------------------
 			case 2:
+				/*
 				lcd_clear();
 				lcd_locate(0,0);
 				lcd_printf("SL: %d", SideL);
 				lcd_locate(0,1);
 				lcd_printf("SR: %d", SideR);
+				*/
+				/*
+				lcd_clear();
+				lcd_locate(0,0);
+				lcd_printf("A: %f", omega_z);
+				lcd_locate(0,1);
+				lcd_printf("        ");
+				*/
+
+				if(SW(1)){
+					LED('R');
+					HAL_Delay(300);
+
+					flag.angle_enable = 1;
+					flag.log_store = 1;
+					//vcm_ctrl(200, &monitoring_vcm_pulse_width);	//1200
+
+					for(int16_t i = 0; i < M_LEN; i++){
+						int16_t pulsewidth = 500;
+						int16_t in = pulsewidth * msig[i];
+						check_in = in;
+						maxon_ctrl(in, -in);
+						HAL_Delay(200);
+
+					}
+
+					LED('B');
+
+
+					//HAL_Delay(3000);
+
+					flag.angle_enable = 0;
+					flag.log_store = 0;
+
+					//vcm_ctrl(0, &monitoring_vcm_pulse_width);
+					maxon_ctrl(0, 0);
+
+					//sd_write_array("Angle log", "Angle.txt", ANGLE_ARRAY_DATA, angle_array, OVER_WRITE);
+					//sd_write_array("Encorder log", "left_M.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					sd_write_array("Identification Log", "output.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					sd_write_array("Identification Log", "input.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
+				}
+				else if(SW(2)){
+					LED('R');
+					HAL_Delay(300);
+					flag.art = 1;
+					flag.log_store = 1;
+					TargetOmega = 15;
+					HAL_Delay(1000);
+
+					TargetOmega = 20;
+					HAL_Delay(1000);
+
+					TargetOmega = 10;
+					HAL_Delay(1000);
+
+					flag.art = 0;
+					flag.log_store = 0;
+					TargetOmega = 0;
+					maxon_ctrl(0, 0);
+					sd_write_array("Identification Log", "Omega152010_H.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+				}
+				else if(SW(3)){
+					LED('R');
+					HAL_Delay(300);
+
+					flag.log_store = 1;
+
+					maxon_ctrl(500, -500);
+
+					HAL_Delay(3000);
+
+					flag.log_store = 0;
+
+					maxon_ctrl(0, 0);
+
+					sd_write_array("Identification Log", "Omega.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+				}
 
 				/*
 				lcd_clear();
@@ -186,9 +359,34 @@ char debug_lcd(){
 
 				lcd_clear();
 				lcd_locate(0,0);
-				lcd_printf("1:%d", timer.check_timer);
+				lcd_printf("%f", TargetOmega);
 				lcd_locate(0,1);
-				lcd_printf("2:%d", timer.check_01ms);
+				lcd_printf("        ");
+
+				//printf("%6d\r\n", timer.spi);
+
+/*
+				if(SW(1)){
+					printf("test\r\n");
+					for(int i = 0; i < DATA_SIZE_; i++){
+					  data[i] = i;
+					}
+					f_unlink("spi/write1.txt");    //file deleat
+					f_unlink("spi/write2.txt");    //file delea
+
+					  timer.spi = 0;
+					  sd_write_array_short("spi", "write1.txt", DATA_SIZE_, data, ADD_WRITE);
+					  sd_read_array_short("spi", "write1.txt", DATA_SIZE_, temp);
+					  sd_write_array_short("spi", "write2.txt", DATA_SIZE_, temp, ADD_WRITE);
+
+
+
+					  printf("%4d round timer: %6d\r\n", DATA_SIZE_, timer.spi);
+
+				}
+*/
+
+				  //printf("f_close\r\n");
 
 
 				/*
@@ -896,6 +1094,8 @@ void TIM7_DAC2_IRQHandler(void){
 //* 備考 : なし
 //************************************************************************/
 void init(){
+	HAL_TIM_Base_Start_IT(&htim6);	//	タイマ㿼割り込みスターヿ
+	HAL_TIM_Base_Start_IT(&htim7);	//	タイマ㿼割り込みスターヿ
 	lcd_init();			//起動に時間がかかる
 	imu_check = IMU_init();
 	sd_mount_check = sd_mount();
@@ -925,8 +1125,7 @@ void init(){
 	TIM4 -> CNT = ENCORDER_OFFSET;
 	TIM5 -> CNT = ENCORDER_OFFSET;
 
-	HAL_TIM_Base_Start_IT(&htim6);	//タイマ㿼割り込みスターヿ
-	HAL_TIM_Base_Start_IT(&htim7);	//タイマ㿼割り込みスターヿ
+
 
 	HAL_TIM_Encoder_Start(&htim4,TIM_CHANNEL_ALL);	//エンコーヿースターヿ
 	HAL_TIM_Encoder_Start(&htim5,TIM_CHANNEL_ALL);	//エンコーヿースターヿ
@@ -938,6 +1137,8 @@ void init(){
 	HAL_ADC_Start_DMA(&hadc1,  (uint32_t *)ad1, DATA_SIZE1);
 
 	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, 0);
+
+
 }
 
 //************************************************************************/
@@ -1619,6 +1820,21 @@ float getRadius(){
 }
 
 //************************************************************************/
+//* 	役割　：　ポテンショの値から半径を計算して返す
+//* 	引数　：　void:
+//* 	戻り値：　float: 半径[mm]
+//* 	備考 :
+//************************************************************************/
+float getAngle(){
+	float theta = 0;	//[rad]
+
+	//theta = Pot * RAD_PER_AD;
+	theta = ad1[6];
+
+	return theta;
+}
+
+//************************************************************************/
 //* 役割　：　imuの値から半径を計算して返す
 //* 引数　：　void:
 //* 戻り値：　float: 半径[mm]
@@ -1640,8 +1856,26 @@ float getRadius_imu(){
 	return radius;
 }
 
+//************************************************************************/
+//* 役割　：　1msごとに角度を配列に格納
+//* 引数　：　void:
+//* 戻り値：　float: 半径[mm]
+//* 備考 :
+//************************************************************************/
+void angle_measurement(char enable){
 
+	static short size;
 
+	if(enable){
+		angle_array[size] = getAngle();
+		size++;
+	}
+	else{
+		size = 0;
+	}
+
+	if(size >= ANGLE_ARRAY_DATA) size = ANGLE_ARRAY_DATA - 1;
+}
 //************************************************************************/
 //* 役割　：　コース記憶に関するデータを配列にぶちこむ
 //* 引数　：　char: enable or disable
@@ -2153,6 +2387,8 @@ void store_log_data(char Flag){
 	static short access;
 	float omega = 0, velo = 0;
 	float now_speed_L, now_speed_R;
+	static int totalL, totalR;
+	static int8_t cnt = 1;
 
 	if(Flag){
 
@@ -2162,13 +2398,24 @@ void store_log_data(char Flag){
 		omega = now_speed_R / (TRED/2);
 		velo = (now_speed_L + now_speed_R) / 2;
 
-		various_memory1[access] = now_speed_L;
-		various_memory2[access] = now_speed_R;
+		totalL += getEncorder_L();
+		totalR += getEncorder_R();
+
+		//if(cnt >= 5){	//5ms 0.005 //10ms 0.01s
+			//various_memory1[access] = getEncorder_L();
+			various_memory1[access] = velo;
+			various_memory2[access] = check_in;
+
+			//various_memory2[access] = getEncorder_R();
+			cnt = 0;
+			access++;
+		//}
+		cnt++;
 
 		//various_memory3[access] = speed_L;
 		//various_memory4[access] = speed_R;
 
-		access++;
+
 
 		if(access >= MEMORY_ARRAY_SIZE_2 - 1){
 			access = 0;
@@ -2537,12 +2784,12 @@ void mesurment_reset(){
 //************************************************************************/
 void sensor_following(char flag){
 	float input_vcm = 0;
-	float kp = 2.1, ki  = 10, kd = 0.003;	//float kp = 1.6, ki  = 10, kd = 0.004;, 3s first float kp = 1, ki  = 0, kd = 0.001; 2sbeforer float kp = 2.0, ki  = 10, kd = 0.004; 2s
+	float kp = 1.0, ki  = 10, kd = 0.002;	//float kp = 1.6, ki  = 10, kd = 0.004;, 3s first float kp = 1, ki  = 0, kd = 0.001; 2sbeforer float kp = 2.0, ki  = 10, kd = 0.004; 2s
 	float p = 0, d = 0, i = 0;
 	float devi = 0;
 	static float pre_devi;
 
-	devi = (Line4 + Line3)/2 - (Line2 + Line1)/2 ;
+	devi = (Line2 + Line1)/2 - (Line4 + Line3)/2 ;
 
 	p = kp * devi;
 	d = kd * (devi - pre_devi) / DELTA_T;
@@ -2567,12 +2814,13 @@ void sensor_following(char flag){
 //************************************************************************/
 void angle_ctrl(char flag, short target_pot){
 	float input_vcm = 0;
-	float kp = 10, ki  = 0, kd = 0.07; //float kp = 10, ki  = 0, kd = 0.1;
+	float kp = 1.6543, ki  = 0.10134, kd = 6.7514; //float kp = 10, ki  = 0, kd = 0.07;
 	float p = 0, d = 0, i = 0;
 	float devi = 0;
 	static float pre_devi;
 
-	devi =  (target_pot - Pot);
+	//devi =  (target_pot - Pot);
+	devi =  (target_pot - ad1[6]);
 
 	p = kp * devi;
 	d = kd * (devi - pre_devi) / DELTA_T;
@@ -2718,22 +2966,59 @@ void trace(char Flag, float kp, float ki, float kd, float *val){
 //************************************************************************/
 void Line_trace(char Flag){
 	float input_L = 0, input_R = 0;
+	float Rval = 0, Tval = 0;
+
 
 	if(Flag){
 		//updata_curve_val(flag.curve, Def_ref, robot_speed, &speed_L, &speed_R);	//カーブ
 
-		//updata_straight_val(flag.straight, robot_speed, &speed_L, &speed_R, gain.kp, gain.ki, gain.kd);			//直線
-		trace(flag.trace, gain.kp, gain.ki, gain.kd, &trace_val);
+		//updata_straight_val(flag.straight, robot_speed, &speed_L, &speed_R, gain.kp, gain.ki, gain.kd);			//	/直線
+		//trace(flag.trace, gain.kp, gain.ki, gain.kd, &trace_val);
 		//printf("%f\r\n", *p_def_speedL);
 
-		speed_ctrl(flag.speed_ctrl_enable, speed_L, speed_R, robot_speed, &speed_val);							//速度制御する
+		//speed_ctrl(flag.speed_ctrl_enable, speed_L, speed_R, robot_speed, &speed_val);							//	速度制御する
 
+		TranslationSpeed(1, &Tval);
+		RotationSpeed(1, &Rval);
+
+		/*
 		input_L = -trace_val + speed_val;
 		input_R =  trace_val + speed_val;
+		*/
+
+		input_L = Tval + Rval;
+		input_R = Tval - Rval;
 
 		maxon_ctrl(input_L, input_R);
 
 	}
+}
+
+float getTargetOmega(){
+	float theta = 0;
+	float Radius = 0;
+	float SpeedL = 0, SpeedR = 0;
+	float SpeedC = 0;
+	//static float pre_theta;
+	float ret = 0;
+
+	SpeedL = MM_PER_PULS * 1000. * getEncorder_L();		//[mm/s]
+	SpeedR = MM_PER_PULS * 1000. * getEncorder_R(); 	//[mm/s]
+	SpeedC = (SpeedL + SpeedR) / 2;
+
+	theta = Pot * RAD_PER_AD;
+	if(theta != 0) Radius = ROTATION_POINT_FROM_AXEL / tan(theta);
+	else Radius = 99999999;
+
+	ret = SpeedC / Radius;
+
+	//ret = (theta - pre_theta) / DELTA_T;
+
+	//pre_theta = theta;
+
+	return -ret;
+	//return theta;
+
 }
 
 /************************************************************************/
@@ -2775,7 +3060,7 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 	#define I_LIMIT 2000 //2000, 0.9, 150,
 
 	float input_L = 0, input_R = 0, input = 0;
-	float kp = 1.7, ki = 140, kd = 0;	// float kp = 1, ki = 150, kd = 0;, beforer float kp = 0.624, ki = 160 float kp = 0.9, ki = 9;float kp = 0.5, ki = 40, kd = 0.00010;
+	float kp = 0.73598, ki = 3.7518, kd = 0;	//float kp = 1.7, ki = 140, kd = 0;
 	float p_L = 0, p_R = 0, p = 0;
 	static float i_L = 0, i_R = 0, i = 0;
 	float d_L = 0, d_R = 0, d = 0;
@@ -2792,8 +3077,6 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 	int ave_encorder = 0;
 
 	//static float pre_robot_speed = 0;
-
-
 
 	if(enable){
 
@@ -2838,8 +3121,8 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 		if(i_L > I_LIMIT)	i_L = I_LIMIT;
 		else if(i_L < -I_LIMIT)	i_L = -I_LIMIT;
 */
-		if(i > I_LIMIT)	i = I_LIMIT;
-		else if(i < -I_LIMIT)	i = -I_LIMIT;
+		//if(i > I_LIMIT)	i = I_LIMIT;
+		//else if(i < -I_LIMIT)	i = -I_LIMIT;
 
 //------------------------FF--------------------------//
 		/*
@@ -2994,6 +3277,7 @@ void speed_ctrl(char enable, float targetL, float targetR, float target, float *
 		//input_R = 1200;
 
 		*val = p + i + ff_duty;
+		maxon_ctrl(p + i, p + i);
 /*
 		pre_devi_L = devi_L;
 		pre_devi_R = devi_R;
@@ -3652,6 +3936,8 @@ void increment_mytimer(){
 	timer.log++;
 	timer.distance++;
 	timer.correction++;
+	timer.spi++;
+	timer.mtim++;
 
 }
 
@@ -3698,7 +3984,7 @@ void LED(char state){
 
 	switch(state){
 		case 'R':	//RED
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2,  GPIO_PIN_RESET);	//R
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2,  GPIO_PIN_RESET);		//R
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);		//G
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);		//B
 		break;
@@ -4011,4 +4297,83 @@ PUTCHAR_PROTOTYPE {
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle) {	//ADC後に呼ばれる
 
 
+}
+
+void RotationSpeed(char enable, float *val){
+	if(enable){
+		float input = 0;
+		float kp = -218.8515, ki  = -4309.9877, kd = 0;
+		float p = 0, d = 0;
+		static float i = 0;
+		float devi = 0;
+		static float pre_devi = 0;
+
+		devi = TargetOmega - omega_z;
+
+		p = kp * devi;
+
+		d = (float)(kd * (devi - pre_devi) / DELTA_T);
+
+		i += ki * DELTA_T * devi;
+
+		input = p + d + i;
+
+		pre_devi = devi;
+
+		*val = input;
+
+	}
+
+}
+void TranslationSpeed(char enable, float *val){
+	float kp = 0.73598, ki = 3.7518, kd = 0;	//float kp = 1.7, ki = 140, kd = 0;
+	float p = 0, d = 0;;
+	static float i = 0;
+
+	float _now_speed_L = 0, _now_speed_R = 0;
+	float devi = 0;
+
+	float now_speed = 0;
+
+	if(enable){
+
+		_now_speed_L = MM_PER_PULS * 1000. * getEncorder_L();		//[mm/s]
+		_now_speed_R = MM_PER_PULS * 1000. * getEncorder_R(); 		//[mm/s]
+
+		now_speed = (_now_speed_L + _now_speed_R) / 2;
+
+		devi = robot_speed - now_speed;
+		p = devi * kp;
+		i += devi * DELTA_T * ki;
+
+		*val = p + i ;
+
+	}
+
+}
+
+void BanquetArt(char enable){
+	if(enable){
+		float input = 0;
+		float kp = -218.8515, ki  = -4309.9877, kd = 0;
+		float p = 0, d = 0;
+		static float i = 0;
+		float devi = 0;
+		static float pre_devi = 0;
+
+		devi = TargetOmega - omega_z;
+
+		p = kp * devi;
+
+		d = (float)(kd * (devi - pre_devi) / DELTA_T);
+
+		i += ki * DELTA_T * devi;
+
+		input = p + d + i;
+
+		maxon_ctrl(input, -input);
+
+		pre_devi = devi;
+
+	}
 }

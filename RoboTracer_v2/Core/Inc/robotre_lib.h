@@ -87,6 +87,14 @@ void fix_acceleration(void);
 void fix_acceleration_2(void);
 short side_sensor_memory(char);
 
+float getAngle();
+void angle_measurement(char);
+
+
+void RotationSpeed(char, float *);
+void TranslationSpeed(char, float *);
+void BanquetArt(char);	//宴会芸
+float getTargetOmega();
 
 
 #endif

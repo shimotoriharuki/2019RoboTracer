@@ -35,6 +35,9 @@ typedef struct {
 	char start_line_flag;
 	char yaw_zero;
 	char after_finish_sd_wtire;
+	char angle_enable;
+	char rotation;
+	char art;
 }Flag;
 
 typedef struct{
@@ -48,6 +51,8 @@ typedef struct{
 	short log;
 	short distance;
 	short correction;
+	int spi;
+	short mtim;
 }Timer;
 
 typedef struct{
@@ -141,6 +146,8 @@ short retention_access;
 int deceleration_cnt;
 short continued_cnt;
 
+float angle_array[ANGLE_ARRAY_DATA];
+
 Flag flag;
 Timer timer;
 Digital digital;
@@ -197,6 +204,13 @@ float average_sens1, average_sens2, average_sens3, average_sens4;
 //char fileName[][64] = {ENCORDER_LOG_TXT, IMU_LOG_TXT, POT_LOG_TXT};
 
 float imu_calibration = 0;
+
+//short msig[M_LEN] = {-1,-1,-1,-1,-1,1,-1,-1,-1,1,-1,-1,-1,1,1,-1,-1,1,-1,-1,-1,1,1,1,-1,1,-1,1,-1,1,1,-1,1,1,-1,-1,-1,1,1,1,-1,-1,-1,1,-1,-1,1,-1,1,-1,1,-1,-1,-1,1,1,-1,1,1,-1,-1,1,1,1,1,1,-1,-1,1,1,1,1,-1,-1,-1,1,-1,1,1,-1,1,1,1,-1,-1,1,-1,1,-1,-1,1,-1,-1,-1,-1,-1,1,-1,-1,1,1,-1,-1,1,1,1,-1,1,-1,-1,-1,1,1,1,1,1,-1,1,1,1,1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,1,1,1,1,-1,1,1,1,-1,-1,-1,-1,1,-1,1,1,-1,-1,1,1,-1,1,1,-1,1,1,1,1,-1,1,-1,-1,-1,-1,1,1,1,-1,-1,1,1,-1,-1,-1,-1,1,-1,-1,1,-1,-1,-1,1,-1,1,-1,1,1,1,-1,1
+//};
+short msig[M_LEN] = {-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,-1,1,-1,1,-1,1,-1,-1,1,1,-1,-1,1,1,1,-1,1,1,1,-1,1,-1,-1,1,-1,1,1,-1,-1,-1,1,1,-1,1,1,1,1
+};
+int16_t check_in = 0;
+float TargetOmega = 0;
 
 #else
 /* 自動生成変数 (CubeMXから変更を加えた場合変える必要があるかも)-------------------------------------------------------------*/
@@ -267,6 +281,9 @@ extern short retention_access;
 extern int deceleration_cnt;
 extern short continued_cnt;
 
+
+extern float angle_array[ANGLE_ARRAY_DATA];
+
 extern Flag flag;
 extern Timer timer;
 extern Digital digital;
@@ -323,5 +340,9 @@ extern float average_sens1, average_sens2, average_sens3, average_sens4;
 //extern char fileName[3];
 
 extern float imu_calibration;
+
+extern short msig[M_LEN];
+int16_t check_in;
+float TargetOmega;
 
 #endif
