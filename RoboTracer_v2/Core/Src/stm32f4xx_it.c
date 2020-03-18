@@ -32,6 +32,8 @@
 #include "G_variable.h"
 #include "AQM0802.h"
 #include "ICM_20648.h"
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -278,6 +280,7 @@ void TIM6_DAC_IRQHandler(void)
 
 	enc_reset();	//	初期値にする
 
+	main_GetSelfLocation();
 
   /* USER CODE END TIM6_DAC_IRQn 0 */
   HAL_TIM_IRQHandler(&htim6);

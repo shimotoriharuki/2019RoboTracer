@@ -1,0 +1,236 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><link rel="stylesheet" type="text/css" href="rtwreport.css" /><title>
+'PathFollowing' のコード生成の前提
+</title>
+
+</head>
+<body onload="try {if (top) {if (top.rtwPageOnLoad) top.rtwPageOnLoad('rtwIdCoderAssumptionsPage'); else local_onload();}} catch(err) {};">
+<h1>
+'PathFollowing' のコード生成の前提
+</h1>
+<div>
+<p>
+チェック可能な仮定と選択したターゲット環境で予測される結果のリスト。詳細については、「<a href="matlab:helpview(fullfile(docroot,'toolbox','ecoder','helptargets.map'),'verif_of_code_generation_assumptions')">Verification of Code Generation Assumptions</a>」を参照してください。
+</p>
+</div>
+<div>
+
+</div>
+<h3 name="sec_STMicroelectronics->ST10/Super10_ターゲット_ハードウェア用の_C_言語構成" id="sec_STMicroelectronics->ST10/Super10_ターゲット_ハードウェア用の_C_言語構成">
+STMicroelectronics->ST10/Super10 ターゲット ハードウェア用の C 言語構成
+</h3>
+<table width="100%" border="0">
+<tr>
+<td align="left" valign="top">
+<p>
+<table class="AltRow" cellspacing="0">
+<tr class="even">
+<td align="left" valign="top">
+BitPerChar
+</td>
+<td align="left" valign="top">
+8
+</td>
+
+</tr>
+<tr class="odd">
+<td align="left" valign="top">
+BitPerShort
+</td>
+<td align="left" valign="top">
+16
+</td>
+
+</tr>
+<tr class="even">
+<td align="left" valign="top">
+BitPerInt
+</td>
+<td align="left" valign="top">
+16
+</td>
+
+</tr>
+<tr class="odd">
+<td align="left" valign="top">
+BitPerLong
+</td>
+<td align="left" valign="top">
+32
+</td>
+
+</tr>
+<tr class="even">
+<td align="left" valign="top">
+BitPerLongLong
+</td>
+<td align="left" valign="top">
+64
+</td>
+
+</tr>
+<tr class="odd">
+<td align="left" valign="top">
+BitPerFloat
+</td>
+<td align="left" valign="top">
+32
+</td>
+
+</tr>
+<tr class="even">
+<td align="left" valign="top">
+BitPerDouble
+</td>
+<td align="left" valign="top">
+64
+</td>
+
+</tr>
+<tr class="odd">
+<td align="left" valign="top">
+BitPerPointer
+</td>
+<td align="left" valign="top">
+16
+</td>
+
+</tr>
+<tr class="even">
+<td align="left" valign="top">
+BitPerSizeT
+</td>
+<td align="left" valign="top">
+16
+</td>
+
+</tr>
+<tr class="odd">
+<td align="left" valign="top">
+BitPerPtrDiffT
+</td>
+<td align="left" valign="top">
+16
+</td>
+
+</tr>
+
+</table>
+<br /><table class="AltRow" cellspacing="0">
+<tr class="even">
+<td align="left" valign="top">
+エンディアン
+</td>
+<td align="left" valign="top">
+LittleEndian
+</td>
+
+</tr>
+<tr class="odd">
+<td align="left" valign="top">
+符号付き整数の右シフトは算術シフトです
+</td>
+<td align="left" valign="top">
+True
+</td>
+
+</tr>
+<tr class="even">
+<td align="left" valign="top">
+符号付き整数の除算の丸め
+</td>
+<td align="left" valign="top">
+Zero
+</td>
+
+</tr>
+
+</table>
+
+</p>
+
+</td>
+
+</tr>
+
+</table>
+<h3 name="sec_C_言語標準" id="sec_C_言語標準">
+C 言語標準
+</h3>
+<table width="100%" border="0">
+<tr>
+<td align="left" valign="top">
+<p>
+ゼロ初期化コードはモデル 'PathFollowing' 用に最適化されています。
+</p>
+<p>
+<table class="AltRow" cellspacing="0">
+<tr class="even">
+<td align="left" valign="top">
+整数のグローバル変数の初期値は 0 です
+</td>
+<td align="left" valign="top">
+True
+</td>
+
+</tr>
+
+</table>
+
+</p>
+<p>
+仮定が正しくない場合は、<a href="matlab:configset.showParameterGroup('PathFollowing',{'Optimization'})">[コンフィギュレーション パラメーター] > [コード生成] > [最適化]</a> 設定で最適化を削除します。あるいは、仮定が有効になるようターゲット環境を構成します。
+</p>
+
+</td>
+
+</tr>
+
+</table>
+<h3 name="sec_浮動小数点数" id="sec_浮動小数点数">
+浮動小数点数
+</h3>
+<table width="100%" border="0">
+<tr>
+<td align="left" valign="top">
+<p>
+コード生成は浮動小数点数をサポートするように構成されているため、ターゲット環境では非正規数の計算が行われる可能性があります。
+</p>
+<p>
+<table class="AltRow" cellspacing="0">
+<tr class="even">
+<td align="left" valign="top">
+flush-to-zero で計算された非正規値 (FTZ)
+</td>
+<td align="left" valign="top">
+False
+</td>
+
+</tr>
+<tr class="odd">
+<td align="left" valign="top">
+flush-to-zero の入力非正規値 (DAZ)
+</td>
+<td align="left" valign="top">
+False
+</td>
+
+</tr>
+
+</table>
+
+</p>
+<p>
+仮定が正しくない場合、非正規数によってモデルと生成コードのシミュレーション間で結果の不一致が生じる可能性があります。詳細については、「<a href="matlab:helpview(fullfile(docroot,'toolbox','ecoder','helptargets.map'),'subnormal_numbers_performance')">非正規数のパフォーマンス</a>」を参照してください。
+</p>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>

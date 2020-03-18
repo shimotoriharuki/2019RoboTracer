@@ -1,0 +1,189 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><link rel="stylesheet" type="text/css" href="rtwreport.css" /><script language="JavaScript" type="text/javascript" src="rtwshrink.js"></script><title>
+PathFollowing の非バーチャル サブシステム
+</title>
+
+</head>
+<body onload="try {if (top) {if (top.rtwPageOnLoad) top.rtwPageOnLoad('rtwIdSubsystem'); else local_onload();}} catch(err) {};">
+<h1>
+PathFollowing の非バーチャル サブシステム
+</h1>
+<div>
+
+</div>
+<div>
+
+</div>
+<h3 name="sec_コード_マッピング" id="sec_コード_マッピング">
+1. コード マッピング <span title="Click to shrink or expand section" style="cursor:pointer;font-weight:normal;" id="rtwIdSubsystem_table_001_control" onclick ="if (rtwTableShrink) rtwTableShrink(window.document, this, 'rtwIdSubsystem_table_001', false)"><span class="shrink-button">[<u>hide</u>]</span></span>
+</h3>
+<table width="100%" name="rtwIdSubsystem_table_001" id="rtwIdSubsystem_table_001" border="0">
+<tr>
+<td align="left" valign="top">
+<p>
+次の表は、 <br /><ul>
+<li>
+モデル内の非バーチャル サブシステムから、生成されたコードの関数または再利用可能な関数へのマッピングを示します。また、
+</li>
+<li>
+一部の非バーチャル サブシステムで、関数のパッケージ化設定 (Subsystem ブロック ダイアログの [関数のパッケージ化] エントリ) が [自動] または [再利用可能な関数] に割り当てられていてもコードが再利用されない原因となった例外について記します。
+</li>
+
+</ul>
+
+</p>
+
+</td>
+
+</tr>
+<tr>
+<td align="left" valign="top">
+<table class="AltRow FirstColumn" cellspacing="0">
+<tr class="heading">
+<th align="left" valign="top">
+<b>
+サブシステム
+</b>
+
+</th>
+<th align="left" valign="top">
+<b>
+再利用設定
+</b>
+
+</th>
+<th align="left" valign="top">
+<b>
+再利用結果
+</b>
+
+</th>
+<th align="left" valign="top">
+<b>
+結果診断
+</b>
+
+</th>
+
+</tr>
+<tr class="even">
+<td align="left" valign="top">
+<a href="matlab:coder.internal.code2model('simlation:129')" name="code2model" class="code2model">&lt;S2&gt;</a>
+</td>
+<td align="left" valign="top">
+Function
+</td>
+<td align="left" valign="top">
+<A HREF="PathFollowing_c.html#fcn_CalcError1" TARGET="rtwreport_document_frame">Function(S2)</A>
+</td>
+<td align="left" valign="top">
+<FONT COLOR="green">normal</FONT>
+</td>
+
+</tr>
+<tr class="odd">
+<td align="left" valign="top">
+<a href="matlab:coder.internal.code2model('simlation:172')" name="code2model" class="code2model">&lt;S3&gt;</a>
+</td>
+<td align="left" valign="top">
+Auto
+</td>
+<td align="left" valign="top">
+Inline
+</td>
+<td align="left" valign="top">
+<FONT COLOR="green">normal</FONT>
+</td>
+
+</tr>
+<tr class="even">
+<td align="left" valign="top">
+<a href="matlab:coder.internal.code2model('simlation:154')" name="code2model" class="code2model">&lt;S4&gt;</a>
+</td>
+<td align="left" valign="top">
+Auto
+</td>
+<td align="left" valign="top">
+Inline
+</td>
+<td align="left" valign="top">
+<FONT COLOR="green">normal</FONT>
+</td>
+
+</tr>
+<tr class="odd">
+<td align="left" valign="top">
+<a href="matlab:coder.internal.code2model('simlation:185')" name="code2model" class="code2model">&lt;S5&gt;</a>
+</td>
+<td align="left" valign="top">
+Auto
+</td>
+<td align="left" valign="top">
+Inline
+</td>
+<td align="left" valign="top">
+<FONT COLOR="green">normal</FONT>
+</td>
+
+</tr>
+<tr class="even">
+<td align="left" valign="top">
+<a href="matlab:coder.internal.code2model('simlation:122')" name="code2model" class="code2model">&lt;S1&gt;</a>
+</td>
+<td align="left" valign="top">
+Inline
+</td>
+<td align="left" valign="top">
+Inline
+</td>
+<td align="left" valign="top">
+<FONT COLOR="green">normal</FONT>
+</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+<h3 name="sec_コード再利用の例外" id="sec_コード再利用の例外">
+2. コード再利用の例外 <span title="Click to shrink or expand section" style="cursor:pointer;font-weight:normal;" id="rtwIdSubsystem_table_002_control" onclick ="if (rtwTableShrink) rtwTableShrink(window.document, this, 'rtwIdSubsystem_table_002', false)"><span class="shrink-button">[<u>hide</u>]</span></span>
+</h3>
+<table width="100%" name="rtwIdSubsystem_table_002" id="rtwIdSubsystem_table_002" border="0">
+<tr>
+<td align="left" valign="top">
+<p>
+次のセクションでは、関数のパッケージ化設定が以下の場合に、非バーチャル サブシステムが以下のようになる原因となる例外の詳細を示します。<br /><ul>
+<li>
+[自動] の場合に、インライン コード セグメントになる
+</li>
+<li>
+[自動] の場合に、引数をもたない、再利用できない関数になる
+</li>
+<li>
+[再利用可能な関数] の場合に、引数をもたない、再利用できない関数になる
+</li>
+
+</ul>
+<b>メモ:</b>このセクションでは、機能プロパティ (次元、データ型、作業ベクトル、パラメーターなど) の違いにより再利用されなかった、[自動] とマークされたグラフィカルに同一な非バーチャル サブシステムについては説明しません。そのような場合は、モデル内またはインライン生成コード内のサブシステムの機能属性の違いを検査することで、再利用できない理由を同定できます。
+</p>
+
+</td>
+
+</tr>
+<tr>
+<td align="left" valign="top">
+<br /><b>モデルにおける再利用不可例外</b>
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>

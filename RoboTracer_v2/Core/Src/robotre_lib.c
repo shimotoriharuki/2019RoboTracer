@@ -4,6 +4,7 @@
  *  Created on: Oct 24, 2019
  *      Author: robot
  */
+#include <stddef.h>
 
 #include <stdio.h>
 #include "main.h"
@@ -21,6 +22,21 @@
 #include "robotre_lib.h"
 #include <string.h>
 
+#include "rt_nonfinite.h"
+#include "GetSelfLocation.h"
+#include "GetSelfLocation_terminate.h"
+#include "GetSelfLocation_initialize.h"
+
+#include "PathFollowing.h"             /* Model's header file */
+#include "rtwtypes.h"
+
+static void argInit_1x2_real_T(double result[2]);
+static void argInit_3x1_real_T(double result[3]);
+static void argInit_3x3_real_T(double result[9]);
+static double argInit_real_T(void);
+void main_GetSelfLocation(void);
+
+void rt_OneStep(void);
 /*
 #define BUFF_SIZE 128
 
@@ -999,6 +1015,7 @@ char goal_area_processing(char reset){
 	}
 
 	return ret;
+
 }
 
 //************************************************************************/
@@ -1138,7 +1155,8 @@ void init(){
 
 	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, 0);
 
-
+	GetSelfLocation_initialize();
+	PathFollowing_initialize();
 }
 
 //************************************************************************/
@@ -4376,4 +4394,141 @@ void BanquetArt(char enable){
 		pre_devi = devi;
 
 	}
+}
+
+
+
+/* Function Definitions */
+
+/*
+ * Arguments    : double result[2]
+ * Return Type  : void
+ */
+static void argInit_1x2_real_T(double result[2])
+{
+  double result_tmp;
+
+  /* Loop over the array to initialize each element. */
+  /* Set the value of the array element.
+     Change this value to the value that the application requires. */
+  result_tmp = argInit_real_T();
+  result[0] = result_tmp;
+
+  /* Set the value of the array element.
+     Change this value to the value that the application requires. */
+  result[1] = result_tmp;
+}
+
+/*
+ * Arguments    : double result[3]
+ * Return Type  : void
+ */
+static void argInit_3x1_real_T(double result[3])
+{
+  double result_tmp;
+
+  /* Loop over the array to initialize each element. */
+  /* Set the value of the array element.
+     Change this value to the value that the application requires. */
+  result_tmp = argInit_real_T();
+  result[0] = result_tmp;
+
+  /* Set the value of the array element.
+     Change this value to the value that the application requires. */
+  result[1] = result_tmp;
+
+  /* Set the value of the array element.
+     Change this value to the value that the application requires. */
+  result[2] = argInit_real_T();
+}
+
+/*
+ * Arguments    : double result[9]
+ * Return Type  : void
+ */
+static void argInit_3x3_real_T(double result[9])
+{
+  int idx0;
+  double result_tmp;
+
+  /* Loop over the array to initialize each element. */
+  for (idx0 = 0; idx0 < 3; idx0++) {
+    /* Set the value of the array element.
+       Change this value to the value that the application requires. */
+    result_tmp = argInit_real_T();
+    result[idx0] = result_tmp;
+
+    /* Set the value of the array element.
+       Change this value to the value that the application requires. */
+    result[idx0 + 3] = result_tmp;
+
+    /* Set the value of the array element.
+       Change this value to the value that the application requires. */
+    result[idx0 + 6] = argInit_real_T();
+  }
+}
+
+/*
+ * Arguments    : void
+ * Return Type  : double
+ */
+static double argInit_real_T(void)
+{
+  return 0.0;
+}
+
+/*
+ * Arguments    : void
+ * Return Type  : void
+ */
+void main_GetSelfLocation(void)
+{
+  double dv0[3];
+  double dv1[9];
+  double dv2[2];
+  double EstPosition[3];
+  double EstPt[9];
+  double ObsZt;
+
+  /* Initialize function 'GetSelfLocation' input arguments. */
+  /* Initialize function input argument 'PrePosition'. */
+  /* Initialize function input argument 'PrePt'. */
+  /* Initialize function input argument 'velo'. */
+  /* Call the entry-point 'GetSelfLocation'. */
+  argInit_3x1_real_T(dv0);
+  argInit_3x3_real_T(dv1);
+  argInit_1x2_real_T(dv2);
+  GetSelfLocation(dv0, dv1, argInit_real_T(), dv2, EstPosition, EstPt, &ObsZt);
+}
+
+/********Following*********/
+void rt_OneStep(void)
+{
+  static boolean_T OverrunFlag = false;
+
+  /* Disable interrupts here */
+
+  /* Check for overrun */
+  if (OverrunFlag) {
+    rtmSetErrorStatus(rtM, "Overrun");
+    return;
+  }
+
+  OverrunFlag = true;
+
+  /* Save FPU context here (if necessary) */
+  /* Re-enable timer or interrupt here */
+  /* Set model inputs here */
+
+  /* Step the model */
+  PathFollowing_step();
+
+  /* Get model outputs here */
+
+  /* Indicate task complete */
+  OverrunFlag = false;
+
+  /* Disable interrupts here */
+  /* Restore FPU context here (if necessary) */
+  /* Enable interrupts here */
 }

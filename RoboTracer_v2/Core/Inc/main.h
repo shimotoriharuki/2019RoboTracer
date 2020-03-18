@@ -32,7 +32,10 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stddef.h>
+#include <stdlib.h>
+#include "rtwtypes.h"
+#include "GetSelfLocation_types.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
