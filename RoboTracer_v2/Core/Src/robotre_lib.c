@@ -34,9 +34,9 @@ static void argInit_1x2_real_T(double result[2]);
 static void argInit_3x1_real_T(double result[3]);
 static void argInit_3x3_real_T(double result[9]);
 static double argInit_real_T(void);
-void main_GetSelfLocation(void);
 
 void rt_OneStep(void);
+
 /*
 #define BUFF_SIZE 128
 
@@ -68,7 +68,6 @@ char debug_lcd(){
 	signed char ready = 0;
 	static short tim = 0;
 
-
 	if(timer.lcd > LCD_WAIT){
 		timer.lcd = 0;
 		//--------------------------------------------------------
@@ -81,6 +80,7 @@ char debug_lcd(){
 				lcd_locate(0,1);
 				lcd_printf("%4d%4d", Line1, Line4);
 				LED('B');
+
 				if(SW(1)){	//m系列信号
 					LED('R');
 					HAL_Delay(300);
@@ -116,24 +116,6 @@ char debug_lcd(){
 					HAL_Delay(300);
 					flag.art = 1;
 					TargetOmega = 0;
-					/*
-					flag.speed_ctrl_enable = 1;
-					flag.log_store = 1;
-					robot_speed = 500;
-					HAL_Delay(1000);
-
-					robot_speed = 1500;
-					HAL_Delay(1000);
-
-					robot_speed = 1000;
-					HAL_Delay(1000);
-
-					flag.speed_ctrl_enable = 0;
-					flag.log_store = 0;
-					robot_speed = 0;
-					maxon_ctrl(0, 0);
-					sd_write_array("Translation Log", "speed50015001000.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
-					*/
 				}
 
 				else if(SW(3)){	//	プリ同定
@@ -153,87 +135,12 @@ char debug_lcd(){
 					sd_write_array("Translation Log", "pre_velo.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
 				}
 
-/*
-				if(SW(1)){
-					LED('R');
-					for(short i = 0; i < 2000; i++){
-						imu_calibration += omega_z_l;
-						HAL_Delay(1);
-					}
-					imu_calibration /= 2000;
-				}
 
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("yaw");
-				lcd_locate(0,1);
-				lcd_printf("%f", yaw_angle);
-				LED('B');
-*/
-				/*
-				if(SW(1)){//
-					//sd_write(FOLDER_0, IMU_LOG1, MEMORY_ARRAY_SIZE_2, radius_memory_2, OVER_WRITE);
-					//sd_write(FOLDER_0, IMU_LOG2, MEMORY_ARRAY_SIZE_2, radius_memory_3, OVER_WRITE);
-					printf("sd_write\r\n");
-
-				}
-				*/
 
 			break;
-			/*
-			case 1:
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("speed");
-				error_reset();
 
-				if(SW(1)){
-					HAL_Delay(500);
-					robot_speed = 100;
-					total_encL = 0;
-					total_encR = 0;
-				}
-				else if(SW(2)){
-					HAL_Delay(500);
-					robot_speed = 1000;
-					total_encL = 0;
-					total_encR = 0;
-				}
-				else if(SW(3)){
-					robot_speed = 0;
-				}
-
-				if(total_encL > 56193 || total_encR > 56193){
-					robot_speed = 0;
-					if(timer.lcd > LCD_WAIT){
-						timer.lcd = 0;
-						lcd_clear();
-						lcd_locate(0,0);
-						lcd_printf("L:%d", total_encL);
-						lcd_locate(0,1);
-						lcd_printf("R:%d", total_encR);
-					}
-
-				}
-			break;
-			*/
 			//--------------------------------------------------------
 			case 2:
-				/*
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("SL: %d", SideL);
-				lcd_locate(0,1);
-				lcd_printf("SR: %d", SideR);
-				*/
-				/*
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("A: %f", omega_z);
-				lcd_locate(0,1);
-				lcd_printf("        ");
-				*/
-
 				if(SW(1)){
 					LED('R');
 					HAL_Delay(300);
@@ -304,182 +211,45 @@ char debug_lcd(){
 					sd_write_array("Identification Log", "Omega.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
 				}
 
-				/*
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("%d", timer.check_timer);
-				lcd_locate(0,1);
-				lcd_printf("        ");
-				*/
-				/*
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("D1:%dD4:%d", getDigital('1'), getDigital('4'));
-				lcd_locate(0,1);
-				lcd_printf("DL:%dDR:%d", getDigital('L'), getDigital('R'));
-				*/
-/*
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("FF");
-				lcd_locate(0,1);
-				lcd_printf("%f", ff_duty_L);
 
-				//ff_accele_L = 10;
-				//ff_accele_R = 10;
-
-				if(SW(1)){
-					HAL_Delay(500);
-					flag.log_store = 1;
-					maxon_ctrl(robot_speed, robot_speed);
-					flag.speed_ctrl_enable = 1;
-					timer.my_timer2 = 0;
-					speed_L = 1000;
-					speed_R = 1000;
-					flag.acc = 1;
-				}
-				else if(SW(3)){
-					LED('N');
-					sd_write_array(FOLDER_4, "velo_log_L_ff_afr.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
-					sd_write_array(FOLDER_4, "velo_log_R_ff_afr.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
-					printf("sd_write\r\n");
-				}
-
-				if(timer.my_timer2 >= 500){
-					speed_L = speed_R = 1000;
-				}
-
-				if((total_encL + total_encR) / 2 >= 70000 || flag.log_store == 0){
-					maxon_ctrl(0, 0);
-					speed_L = speed_R = 0;
-					flag.speed_ctrl_enable = 0;
-					total_encL = total_encR = 0;
-					//flag.imu_store_2 = 0;
-					flag.acc = 0;
-				}
-				*/
 
 				LED('G');
 			break;
-			/*
-			case 3:
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("acc");
-				lcd_locate(0,1);
-				lcd_printf("%f", increment_acc);
-			break;
-			*/
+
 			//--------------------------------------------------------
 			case 4:
 
 				lcd_clear();
 				lcd_locate(0,0);
-				lcd_printf("%f", TargetOmega);
+				lcd_printf("%lf", TargetVelo[0]);
 				lcd_locate(0,1);
-				lcd_printf("        ");
-
-				//printf("%6d\r\n", timer.spi);
-
-/*
-				if(SW(1)){
-					printf("test\r\n");
-					for(int i = 0; i < DATA_SIZE_; i++){
-					  data[i] = i;
-					}
-					f_unlink("spi/write1.txt");    //file deleat
-					f_unlink("spi/write2.txt");    //file delea
-
-					  timer.spi = 0;
-					  sd_write_array_short("spi", "write1.txt", DATA_SIZE_, data, ADD_WRITE);
-					  sd_read_array_short("spi", "write1.txt", DATA_SIZE_, temp);
-					  sd_write_array_short("spi", "write2.txt", DATA_SIZE_, temp, ADD_WRITE);
+				lcd_printf("%lf", TargetVelo[1]);
 
 
-
-					  printf("%4d round timer: %6d\r\n", DATA_SIZE_, timer.spi);
-
-				}
-*/
-
-				  //printf("f_close\r\n");
-
-
-				/*
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("imu test");
-				lcd_locate(0,1);
-				lcd_printf("%d", tim);
-
-				if(SW(1)){
-
-					HAL_Delay(500);
-					robot_speed = 300;
-					timer.my_timer2 = 0;
-					flag.log_store = 1;
-					flag.speed_ctrl_enable = 1;
-				}
-				else if(SW(2)){
-					robot_speed = 0;
-					flag.log_store = 0;
-				}
-				else if(SW(3)){
-					LED('N');
-					sd_write_array(FOLDER_2, "velo_log_L_ffhenka.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
-					sd_write_array(FOLDER_2, "velo_log_R_ffhenka.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
-
-					printf("sd_write\r\n");
-
-				}
-
-
-				if(total_encL > ONE_ROTATION_COUNT || total_encR > ONE_ROTATION_COUNT){
-					robot_speed = 0;
-					tim = timer.my_timer2;
-					total_encL = total_encR = 0;
-					flag.log_store = 0;
-					flag.speed_ctrl_enable = 0;
-
-				}
-				else if(total_encL > ONE_ROTATION_COUNT/2 || total_encR > ONE_ROTATION_COUNT/2){
-					robot_speed = 200;
-				}
-
-				else if(total_encL > ONE_ROTATION_COUNT/4 || total_encR > ONE_ROTATION_COUNT/4){
-					robot_speed = 500;
-				}
-				*/
-				LED('Y');
-
-				/*
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("angle");
 
 				if(SW(1)){
 					LED('R');
-					error_reset();
-					flag.angle = 1;
-					//vcm_ctrl(500, &monitoring_vcm_pulse_width);
-				}
-				else if(SW(2)){
-					LED('G');
-					//vcm_ctrl(0, &monitoring_vcm_pulse_width);
-				}
-				else if(SW(3)){
+					TargetVelo[0] = 1;
+					TargetVelo[1] = 0.1;
+					flag.GSL_enable = 1;
+					HAL_Delay(5000);
+
 					LED('B');
-					motor_reset();
-					flag_reset();
+					sd_write_array("EstimationLocation", "x.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					sd_write_array("EstimationLocation", "y.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
+					sd_write_array("EstimationLocation", "th.txt", MEMORY_ARRAY_SIZE_2, various_memory3, OVER_WRITE);
+
+					flag.GSL_enable = 0;
 				}
-				*/
+				else{
+					flag.GSL_enable = 0;
+					TargetVelo[0] = 0;
+					TargetVelo[1] = 0;
+				}
+
+				LED('Y');
 			break;
 
-			/*
-			case 5:
-
-			break;
-			*/
 			//--------------------------------------------------------
 			case 6:
 				lcd_clear();
@@ -493,144 +263,7 @@ char debug_lcd(){
 
 
 			break;
-			/*
-			case 7:
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("angle");
 
-				if(SW(1)){
-					LED('R');
-					error_reset();
-					flag.angle = 1;
-				}
-				else if(SW(2)){
-					LED('G');
-				}
-				else if(SW(3)){
-					LED('B');
-					motor_reset();
-					flag_reset();
-				}
-			break;
-			*/
-			/*
-			case 8:
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("ERR: %d", error_check(&error_number));
-				lcd_locate(0,1);
-				lcd_printf("NUM: %d", error_number);
-				if(SW(1)) error_reset();
-
-
-
-			break;
-			*/
-			/*
-			case 9:
-
-			break;
-			*/
-			/*
-			case 10:
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("Hand");
-				lcd_locate(0,1);
-				lcd_printf("Push");
-
-				if(SW(1)){
-					LED('R');
-					error_reset();
-					flag.following_start = 1;
-
-				}
-				else if(SW(2)){
-					LED('G');
-					flag.hand_push = 1;
-					total_encL = 0;
-					total_encR = 0;
-				}
-				else if(SW(3)){
-					LED('B');
-					motor_reset();
-					flag_reset();
-
-					lcd_clear();
-					lcd_locate(0,0);
-					lcd_printf("L:%d", total_encL);
-					lcd_locate(0,1);
-					lcd_printf("R:%d", total_encR);
-
-					//while(1);
-				}
-			break;
-			*/
-			/*
-			case 11:
-
-
-			break;
-			*/
-			/*
-			case 12:
-				lcd_locate(0,0);
-				lcd_printf("radius");
-				lcd_locate(0,1);
-				lcd_printf("%d", getRadius_imu());
-
-			break;
-			*/
-			/*
-			case 13:
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("imu test");
-				lcd_locate(0,1);
-				lcd_printf("%d", tim);
-
-				if(SW(1)){
-					HAL_Delay(500);
-					robot_speed = 560;
-					timer.my_timer2 = 0;
-					flag.imu_store = 1;
-				}
-				else if(SW(2)){
-					robot_speed = 0;
-					flag.imu_store = 0;
-				}
-				else if(SW(3)){
-					for(short i = 0; i < 2500; i++){
-						//printf("%d\r\n", imu_data[i]);
-					}
-				}
-
-				if(total_encL > ONE_ROTATION_COUNT || total_encR < -ONE_ROTATION_COUNT){
-					robot_speed = 0;
-					tim = timer.my_timer2;
-					total_encL = total_encR = 0;
-					flag.imu_store = 0;
-				}
-			break;
-			*/
-			/*
-			case 14:
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("E");
-			break;
-			*/
-			/*
-			case 15:
-				lcd_clear();
-				lcd_locate(0,0);
-				lcd_printf("EL:%d", total_encL);
-				lcd_locate(0,1);
-				lcd_printf("ER:%d", total_encR);
-
-			break;
-			*/
 		}
 	}
 	return ready;
@@ -4481,11 +4114,13 @@ static double argInit_real_T(void)
  * Arguments    : void
  * Return Type  : void
  */
-void main_GetSelfLocation(void)
+void main_GetSelfLocation(double velo[2])
 {
-  double dv0[3];
-  double dv1[9];
-  double dv2[2];
+  static uint16_t access;
+  static double PrePosition[3];
+  static double PrePt[9];
+  static double PreZt;
+  //double velo[2];
   double EstPosition[3];
   double EstPt[9];
   double ObsZt;
@@ -4495,10 +4130,22 @@ void main_GetSelfLocation(void)
   /* Initialize function input argument 'PrePt'. */
   /* Initialize function input argument 'velo'. */
   /* Call the entry-point 'GetSelfLocation'. */
-  argInit_3x1_real_T(dv0);
-  argInit_3x3_real_T(dv1);
-  argInit_1x2_real_T(dv2);
-  GetSelfLocation(dv0, dv1, argInit_real_T(), dv2, EstPosition, EstPt, &ObsZt);
+  argInit_3x1_real_T(PrePosition);
+  argInit_3x3_real_T(PrePt);
+  argInit_1x2_real_T(velo);
+
+  GetSelfLocation(PrePosition, PrePt, PreZt, velo, EstPosition, EstPt, &ObsZt);
+
+  various_memory1[access] = EstPosition[0];
+  various_memory2[access] = EstPosition[1];
+  various_memory3[access] = EstPosition[2];
+  access++;
+  if(access >= MEMORY_ARRAY_SIZE_2 - 1) access = MEMORY_ARRAY_SIZE_2 - 1;
+
+  memcpy(PrePosition, EstPosition, sizeof(EstPosition));
+  memcpy(PrePt, EstPt, sizeof(EstPt));
+  PreZt = ObsZt;
+
 }
 
 /********Following*********/

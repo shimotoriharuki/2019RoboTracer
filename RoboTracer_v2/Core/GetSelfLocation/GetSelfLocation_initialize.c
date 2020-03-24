@@ -5,7 +5,7 @@
  * File: GetSelfLocation_initialize.c
  *
  * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 17-Mar-2020 14:06:13
+ * C/C++ source code generated on  : 24-Mar-2020 14:05:57
  */
 
 /* Include Files */
@@ -30,13 +30,13 @@ void GetSelfLocation_initialize(void)
   rt_InitInfAndNaN(8U);
   state_not_empty_init();
   method_not_empty_init();
-  dt = 0.1;
-  Tred = 0.1;
+  dt = 0.01;
+  Tred = 0.126;
   Qt = 1.0E-6;
-  ErrerParameter[0] = 0.01;
-  ErrerParameter[1] = 0.01;
-  ErrerParameter[2] = 0.01;
-  ErrerParameter[3] = 0.01;
+  ErrerParameter[0] = 0.5;
+  ErrerParameter[1] = 0.5;
+  ErrerParameter[2] = 0.5;
+  ErrerParameter[3] = 0.5;
   eml_rand_init();
   eml_rand_mcg16807_stateful_init();
   eml_rand_shr3cong_stateful_init();

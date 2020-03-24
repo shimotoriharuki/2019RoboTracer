@@ -93,9 +93,10 @@ void angle_measurement(char);
 
 void RotationSpeed(char, float *);
 void TranslationSpeed(char, float *);
-void BanquetArt(char);	//宴会芸
+void BanquetArt(char);	//	宴会芸
 float getTargetOmega();
 
+void main_GetSelfLocation(double *);
 
 #endif
 

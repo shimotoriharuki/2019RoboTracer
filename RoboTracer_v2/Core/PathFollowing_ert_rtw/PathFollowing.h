@@ -22,10 +22,12 @@
 
 #ifndef RTW_HEADER_PathFollowing_h_
 #define RTW_HEADER_PathFollowing_h_
+
 #include <math.h>
 #ifndef PathFollowing_COMMON_INCLUDES_
 # define PathFollowing_COMMON_INCLUDES_
 #include "rtwtypes.h"
+
 #endif                                 /* PathFollowing_COMMON_INCLUDES_ */
 
 /* Macros for accessing real-time model data structure */
@@ -63,7 +65,7 @@ typedef struct {
 /* External outputs (root outports fed by signals with default storage) */
 typedef struct {
   real_T v_tar;                        /* '<Root>/v_tar' */
-  real_T _tar;                         /* '<Root>/ƒÖ_tar' */
+  real_T _tar;                         /* '<Root>/ï¿½ï¿½_tar' */
 } ExtY;
 
 /* Real-time Model Data Structure */
@@ -108,7 +110,7 @@ extern RT_MODEL *const rtM;
  * '<S1>'   : 'simlation/PathFollowing'
  * '<S2>'   : 'simlation/PathFollowing/CalcError1'
  * '<S3>'   : 'simlation/PathFollowing/ClacInputRef '
- * '<S4>'   : 'simlation/PathFollowing/ClacTarget_VƒÖ1'
+ * '<S4>'   : 'simlation/PathFollowing/ClacTarget_Vï¿½ï¿½1'
  * '<S5>'   : 'simlation/PathFollowing/Limitter'
  * '<S6>'   : 'simlation/PathFollowing/ClacInputRef /Derivative1'
  * '<S7>'   : 'simlation/PathFollowing/ClacInputRef /Derivative5'

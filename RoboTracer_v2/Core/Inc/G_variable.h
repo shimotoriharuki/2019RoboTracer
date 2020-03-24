@@ -38,6 +38,7 @@ typedef struct {
 	char angle_enable;
 	char rotation;
 	char art;
+	char GSL_enable;
 }Flag;
 
 typedef struct{
@@ -182,7 +183,7 @@ float xg_l, yg_l, zg_l;
 //float radius_memory_3[MEMORY_ARRAY_SIZE_2];
 float various_memory1[MEMORY_ARRAY_SIZE_2];
 float various_memory2[MEMORY_ARRAY_SIZE_2];
-//float various_memory3[MEMORY_ARRAY_SIZE_2];
+float various_memory3[MEMORY_ARRAY_SIZE_2];
 //float various_memory4[MEMORY_ARRAY_SIZE_2];
 
 float omega_x, omega_y, omega_z;
@@ -211,6 +212,8 @@ short msig[M_LEN] = {-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,-1,1,-1,1,-1,1,-1,-1,1,1,-1
 };
 int16_t check_in = 0;
 float TargetOmega = 0;
+
+double TargetVelo[2] = {0, 0};
 
 #else
 /* 自動生成変数 (CubeMXから変更を加えた場合変える必要があるかも)-------------------------------------------------------------*/
@@ -344,5 +347,7 @@ extern float imu_calibration;
 extern short msig[M_LEN];
 int16_t check_in;
 float TargetOmega;
+
+double TargetVelo[2];
 
 #endif
