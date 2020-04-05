@@ -248,6 +248,8 @@ void TIM6_DAC_IRQHandler(void)
 
 	static short ad_timer = 0;
 	static uint8_t cnt;
+	int16_t SumPulse;
+	static double SumVelo[2];
 
 	increment_mytimer();
 
@@ -260,6 +262,7 @@ void TIM6_DAC_IRQHandler(void)
 	read_gyro_data();
 	read_accel_data();
 	updata_imu_data_lowpassed();
+	CalcIMUoffset(flag.IMU_offset);
 
 	store_log_data(flag.log_store);
 	//RotationTest(flag.rotation);
@@ -279,16 +282,61 @@ void TIM6_DAC_IRQHandler(void)
 
 	updata_enc_cnt(&total_encL, &total_encR, &total_encL_memory, &total_encR_memory, &total_encL_distance, &total_encR_distance, &total_encL_reset, &total_encR_reset);
 
-	enc_reset();	//	初期値にする
-
 	cnt++;
+	SumPulse = (getEncorder_L() + getEncorder_R()) / 2;
+	SumVelo[0] += MM_PER_PULS * SumPulse;	//[m/s]
+	SumVelo[1] += omega_z_l;	//[rad/s]
+
 	if(cnt >= 10){	//10ms
-		if(flag.GSL_enable){
-			main_GetSelfLocation(TargetVelo);
+		static uint16_t access;
+
+		CurrentVelo[0] = SumVelo[0] / cnt;	//[m/s]
+		CurrentVelo[1] = SumVelo[1] / cnt;	//[rad/s]
+		//SumPulse = (getEncorder_L() + getEncorder_R()) / 2;
+		//CurrentVelo[0] = MM_PER_PULS * SumPulse;	//[m/s]
+		//CurrentVelo[1] = omega_z_l;
+
+
+		if(flag.GSL_enable == 1){
+
+			GetPosition(PreDR_Position, DR_Position, CurrentVelo, flag.GSL_enable);
+
+			//GetPosition(PreRobotPosition, MeaRobotPosition, CurrentVelo, flag.GSL_enable);
+			//main_GetSelfLocation(MeaRobotPosition, CurrentVelo, RobotPosition);
+
+			various_memory1[access] = DR_Position[0];
+			various_memory2[access] = DR_Position[1];
+			various_memory3[access] = DR_Position[2];
+
+			various_memory4[access] = RobotPosition[0];
+			various_memory5[access] = RobotPosition[1];
+			various_memory6[access] = RobotPosition[2];
+
+			PreDR_Position[0] = DR_Position[0];
+			PreDR_Position[1] = DR_Position[1];
+			PreDR_Position[2] = DR_Position[2];
+
+			PreRobotPosition[0] = RobotPosition[0];
+			PreRobotPosition[1] = RobotPosition[1];
+			PreRobotPosition[2] = RobotPosition[2];
+
+			MeaRobotPosition[0] = 0;
+			MeaRobotPosition[1] = 0;
+			MeaRobotPosition[2] = 0;
+
+
+			access++;
+			if(access >= MEMORY_ARRAY_SIZE_2 - 1) access = MEMORY_ARRAY_SIZE_2 - 1;
+
 		}
 
+		SumVelo[0] = 0;
+		SumVelo[1] = 0;
+		SumPulse = 0;
 		cnt = 0;
 	}
+
+	enc_reset();	//	初期値にする
 
   /* USER CODE END TIM6_DAC_IRQn 0 */
   HAL_TIM_IRQHandler(&htim6);

@@ -5,7 +5,7 @@
  * File: randn.c
  *
  * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 24-Mar-2020 14:05:57
+ * C/C++ source code generated on  : 24-Mar-2020 17:34:25
  */
 
 /* Include Files */
@@ -23,11 +23,8 @@ static unsigned int d_state[625];
 
 /* Function Declarations */
 static double b_genrandu(unsigned int mt[625]);
-static double eml_rand(void);
 static double eml_rand_mt19937ar(unsigned int e_state[625]);
-static double eml_rand_mt19937ar_stateful(void);
 static double eml_rand_shr3cong(unsigned int e_state[2]);
-static double eml_randn(void);
 static void genrand_uint32_vector(unsigned int mt[625], unsigned int u[2]);
 static void genrandu(unsigned int s, unsigned int *e_state, double *r);
 
@@ -91,34 +88,6 @@ static double b_genrandu(unsigned int mt[625])
 }
 
 /*
- * Arguments    : void
- * Return Type  : double
- */
-static double eml_rand(void)
-{
-  double r;
-  unsigned int e_state;
-  double t;
-  if (b_method == 4U) {
-    do {
-      genrandu(b_state, &e_state, &r);
-      genrandu(e_state, &b_state, &t);
-      r = 2.0 * r - 1.0;
-      t = 2.0 * t - 1.0;
-      t = t * t + r * r;
-    } while (!(t <= 1.0));
-
-    r *= sqrt(-2.0 * log(t) / t);
-  } else if (b_method == 5U) {
-    r = eml_rand_shr3cong(c_state);
-  } else {
-    r = eml_rand_mt19937ar_stateful();
-  }
-
-  return r;
-}
-
-/*
  * Arguments    : unsigned int e_state[625]
  * Return Type  : double
  */
@@ -128,7 +97,7 @@ static double eml_rand_mt19937ar(unsigned int e_state[625])
   int exitg1;
   unsigned int u32[2];
   int i;
-  static const double dv4[257] = { 0.0, 0.215241895984875, 0.286174591792068,
+  static const double dv6[257] = { 0.0, 0.215241895984875, 0.286174591792068,
     0.335737519214422, 0.375121332878378, 0.408389134611989, 0.43751840220787,
     0.46363433679088, 0.487443966139235, 0.50942332960209, 0.529909720661557,
     0.549151702327164, 0.567338257053817, 0.584616766106378, 0.601104617755991,
@@ -195,7 +164,7 @@ static double eml_rand_mt19937ar(unsigned int e_state[625])
     3.65415288536101, 3.91075795952492 };
 
   double u;
-  static const double dv5[257] = { 1.0, 0.977101701267673, 0.959879091800108,
+  static const double dv7[257] = { 1.0, 0.977101701267673, 0.959879091800108,
     0.9451989534423, 0.932060075959231, 0.919991505039348, 0.908726440052131,
     0.898095921898344, 0.887984660755834, 0.878309655808918, 0.869008688036857,
     0.860033621196332, 0.851346258458678, 0.842915653112205, 0.834716292986884,
@@ -271,12 +240,12 @@ static double eml_rand_mt19937ar(unsigned int e_state[625])
     genrand_uint32_vector(e_state, u32);
     i = (int)((u32[1] >> 24U) + 1U);
     r = (((double)(u32[0] >> 3U) * 1.6777216E+7 + (double)((int)u32[1] &
-           16777215)) * 2.2204460492503131E-16 - 1.0) * dv4[i];
-    if (fabs(r) <= dv4[i - 1]) {
+           16777215)) * 2.2204460492503131E-16 - 1.0) * dv6[i];
+    if (fabs(r) <= dv6[i - 1]) {
       exitg1 = 1;
     } else if (i < 256) {
       u = b_genrandu(e_state);
-      if (dv5[i] + u * (dv5[i - 1] - dv5[i]) < exp(-0.5 * r * r)) {
+      if (dv7[i] + u * (dv7[i - 1] - dv7[i]) < exp(-0.5 * r * r)) {
         exitg1 = 1;
       }
     } else {
@@ -300,30 +269,6 @@ static double eml_rand_mt19937ar(unsigned int e_state[625])
 }
 
 /*
- * Arguments    : void
- * Return Type  : double
- */
-static double eml_rand_mt19937ar_stateful(void)
-{
-  unsigned int b_r;
-  int mti;
-  if (!state_not_empty) {
-    memset(&d_state[0], 0, 625U * sizeof(unsigned int));
-    b_r = 5489U;
-    d_state[0] = 5489U;
-    for (mti = 0; mti < 623; mti++) {
-      b_r = ((b_r ^ b_r >> 30U) * 1812433253U + mti) + 1U;
-      d_state[mti + 1] = b_r;
-    }
-
-    d_state[624] = 624U;
-    state_not_empty = true;
-  }
-
-  return eml_rand_mt19937ar(d_state);
-}
-
-/*
  * Arguments    : unsigned int e_state[2]
  * Return Type  : double
  */
@@ -334,7 +279,7 @@ static double eml_rand_shr3cong(unsigned int e_state[2])
   unsigned int jsr;
   unsigned int ui;
   int j;
-  static const double dv3[65] = { 0.340945, 0.4573146, 0.5397793, 0.6062427,
+  static const double dv5[65] = { 0.340945, 0.4573146, 0.5397793, 0.6062427,
     0.6631691, 0.7136975, 0.7596125, 0.8020356, 0.8417227, 0.8792102, 0.9148948,
     0.9490791, 0.9820005, 1.0138492, 1.044781, 1.0749254, 1.1043917, 1.1332738,
     1.161653, 1.189601, 1.2171815, 1.2444516, 1.2714635, 1.298265, 1.3249008,
@@ -354,11 +299,11 @@ static double eml_rand_shr3cong(unsigned int e_state[2])
   jsr ^= jsr << 5;
   ui = icng + jsr;
   j = (int)((ui & 63U) + 1U);
-  r = (double)(int)ui * 4.6566128730773926E-10 * dv3[j];
+  r = (double)(int)ui * 4.6566128730773926E-10 * dv5[j];
   x = fabs(r);
-  y = dv3[j - 1];
+  y = dv5[j - 1];
   if (!(x <= y)) {
-    x = (x - y) / (dv3[j] - y);
+    x = (x - y) / (dv5[j] - y);
     icng = 69069U * icng + 1234567U;
     jsr ^= jsr << 13;
     jsr ^= jsr >> 17;
@@ -381,7 +326,7 @@ static double eml_rand_shr3cong(unsigned int e_state[2])
             r = x;
           }
         } else {
-          if (!(exp(-0.5 * dv3[j] * dv3[j]) + y * 0.01958303 / dv3[j] <= exp
+          if (!(exp(-0.5 * dv5[j] * dv5[j]) + y * 0.01958303 / dv5[j] <= exp
                 (-0.5 * r * r))) {
             do {
               icng = 69069U * icng + 1234567U;
@@ -410,47 +355,6 @@ static double eml_rand_shr3cong(unsigned int e_state[2])
 
   e_state[0] = icng;
   e_state[1] = jsr;
-  return r;
-}
-
-/*
- * Arguments    : void
- * Return Type  : double
- */
-static double eml_randn(void)
-{
-  double r;
-  unsigned int e_state;
-  unsigned int f_state;
-  double t;
-  if (!method_not_empty) {
-    method = 0U;
-    method_not_empty = true;
-    state[0] = 362436069U;
-    state[1] = 0U;
-    if (state[1] == 0U) {
-      state[1] = 521288629U;
-    }
-  }
-
-  if (method == 0U) {
-    r = eml_rand();
-  } else if (method == 4U) {
-    e_state = state[0];
-    do {
-      genrandu(e_state, &f_state, &r);
-      genrandu(f_state, &e_state, &t);
-      r = 2.0 * r - 1.0;
-      t = 2.0 * t - 1.0;
-      t = t * t + r * r;
-    } while (!(t <= 1.0));
-
-    r *= sqrt(-2.0 * log(t) / t);
-    state[0] = e_state;
-  } else {
-    r = eml_rand_shr3cong(state);
-  }
-
   return r;
 }
 
@@ -539,7 +443,67 @@ static void genrandu(unsigned int s, unsigned int *e_state, double *r)
  */
 double randn(void)
 {
-  return eml_randn();
+  double r;
+  unsigned int b_r;
+  unsigned int e_state;
+  double t;
+  int mti;
+  if (!method_not_empty) {
+    method = 0U;
+    method_not_empty = true;
+    state[0] = 362436069U;
+    state[1] = 0U;
+    if (state[1] == 0U) {
+      state[1] = 521288629U;
+    }
+  }
+
+  if (method == 0U) {
+    if (b_method == 4U) {
+      do {
+        genrandu(b_state, &b_r, &r);
+        genrandu(b_r, &b_state, &t);
+        r = 2.0 * r - 1.0;
+        t = 2.0 * t - 1.0;
+        t = t * t + r * r;
+      } while (!(t <= 1.0));
+
+      r *= sqrt(-2.0 * log(t) / t);
+    } else if (b_method == 5U) {
+      r = eml_rand_shr3cong(c_state);
+    } else {
+      if (!state_not_empty) {
+        memset(&d_state[0], 0, 625U * sizeof(unsigned int));
+        b_r = 5489U;
+        d_state[0] = 5489U;
+        for (mti = 0; mti < 623; mti++) {
+          b_r = ((b_r ^ b_r >> 30U) * 1812433253U + mti) + 1U;
+          d_state[mti + 1] = b_r;
+        }
+
+        d_state[624] = 624U;
+        state_not_empty = true;
+      }
+
+      r = eml_rand_mt19937ar(d_state);
+    }
+  } else if (method == 4U) {
+    b_r = state[0];
+    do {
+      genrandu(b_r, &e_state, &r);
+      genrandu(e_state, &b_r, &t);
+      r = 2.0 * r - 1.0;
+      t = 2.0 * t - 1.0;
+      t = t * t + r * r;
+    } while (!(t <= 1.0));
+
+    r *= sqrt(-2.0 * log(t) / t);
+    state[0] = b_r;
+  } else {
+    r = eml_rand_shr3cong(state);
+  }
+
+  return r;
 }
 
 /*

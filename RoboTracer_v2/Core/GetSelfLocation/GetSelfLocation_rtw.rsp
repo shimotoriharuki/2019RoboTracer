@@ -1,4 +1,3 @@
-CalcRt.o
 GetSelfLocation.o
 GetSelfLocation_data.o
 GetSelfLocation_initialize.o

@@ -1,13 +1,13 @@
 ###########################################################################
-## Makefile generated for MATLAB file/project 'GetSelfLocation'. 
+## Makefile generated for MATLAB file/project 'GetMeaPosition'. 
 ## 
-## Makefile     : GetSelfLocation_rtw.mk
-## Generated on : Tue Mar 24 17:34:31 2020
+## Makefile     : GetMeaPosition_rtw.mk
+## Generated on : Tue Mar 24 17:53:46 2020
 ## MATLAB Coder version: 4.2 (R2019a)
 ## 
 ## Build Info:
 ## 
-## Final product: ./GetSelfLocation.lib
+## Final product: ./GetMeaPosition.lib
 ## Product type : static-library
 ## 
 ###########################################################################
@@ -23,19 +23,19 @@
 # COMPILER_COMMAND_FILE   Compiler command listing model reference header paths
 # CMD_FILE                Command file
 
-PRODUCT_NAME              = GetSelfLocation
-MAKEFILE                  = GetSelfLocation_rtw.mk
+PRODUCT_NAME              = GetMeaPosition
+MAKEFILE                  = GetMeaPosition_rtw.mk
 COMPUTER                  = PCWIN64
 MATLAB_ROOT               = C:/PROGRA~1/MATLAB/R2019a
 MATLAB_BIN                = C:/PROGRA~1/MATLAB/R2019a/bin
 MATLAB_ARCH_BIN           = $(MATLAB_BIN)/win64
 MASTER_ANCHOR_DIR         = 
-START_DIR                 = C:/Users/robot/Documents/MATLAB/2020_RoboTrace/Self-locationEstimation/coder/codegen/lib/GetSelfLocation
+START_DIR                 = C:/Users/robot/Documents/MATLAB/2020_RoboTrace/Self-locationEstimation/coder/codegen/lib/GetMeaPosition
 ARCH                      = win64
 TGT_FCN_LIB               = ISO_C
 RELATIVE_PATH_TO_ANCHOR   = .
-COMPILER_COMMAND_FILE     = GetSelfLocation_rtw_comp.rsp
-CMD_FILE                  = GetSelfLocation_rtw.rsp
+COMPILER_COMMAND_FILE     = GetMeaPosition_rtw_comp.rsp
+CMD_FILE                  = GetMeaPosition_rtw.rsp
 C_STANDARD_OPTS           = 
 CPP_STANDARD_OPTS         = 
 
@@ -198,7 +198,7 @@ SHAREDLIB_LDFLAGS    =
 ## OUTPUT INFO
 ###########################################################################
 
-PRODUCT = ./GetSelfLocation.lib
+PRODUCT = ./GetMeaPosition.lib
 PRODUCT_TYPE = "static-library"
 BUILD_TYPE = "Static Library"
 
@@ -214,10 +214,10 @@ INCLUDES = $(INCLUDES_BUILDINFO)
 ## DEFINES
 ###########################################################################
 
-DEFINES_ = -D__MW_TARGET_USE_HARDWARE_RESOURCES_H__ -DNULL=0 -D__NO_SYSTEM_INIT -DARM_MATH_CM3=1 -D__NVIC_PRIO_BITS=3 -DEXIT_FAILURE=1 -DEXTMODE_DISABLEPRINTF -DEXTMODE_DISABLETESTING -DEXTMODE_DISABLE_ARGS_PROCESSING=1 -DSTACK_SIZE=200000 -DMODEL=GetSelfLocation -DHAVESTDIO -DUSE_RTMODEL
+DEFINES_ = -D__MW_TARGET_USE_HARDWARE_RESOURCES_H__ -DNULL=0 -D__NO_SYSTEM_INIT -DARM_MATH_CM3=1 -D__NVIC_PRIO_BITS=3 -DEXIT_FAILURE=1 -DEXTMODE_DISABLEPRINTF -DEXTMODE_DISABLETESTING -DEXTMODE_DISABLE_ARGS_PROCESSING=1 -DSTACK_SIZE=200000 -DMODEL=GetMeaPosition -DHAVESTDIO -DUSE_RTMODEL
 DEFINES_CUSTOM = 
 DEFINES_SKIPFORSIL = -DNULL=0 -D__NO_SYSTEM_INIT -DARM_MATH_CM3=1 -D__NVIC_PRIO_BITS=3 -DEXIT_FAILURE=1 -DEXTMODE_DISABLEPRINTF -DEXTMODE_DISABLETESTING -DEXTMODE_DISABLE_ARGS_PROCESSING=1 -DSTACK_SIZE=200000
-DEFINES_STANDARD = -DMODEL=GetSelfLocation -DHAVESTDIO -DUSE_RTMODEL
+DEFINES_STANDARD = -DMODEL=GetMeaPosition -DHAVESTDIO -DUSE_RTMODEL
 
 DEFINES = $(DEFINES_) $(DEFINES_CUSTOM) $(DEFINES_SKIPFORSIL) $(DEFINES_STANDARD)
 
@@ -225,7 +225,7 @@ DEFINES = $(DEFINES_) $(DEFINES_CUSTOM) $(DEFINES_SKIPFORSIL) $(DEFINES_STANDARD
 ## SOURCE FILES
 ###########################################################################
 
-SRCS = $(START_DIR)/GetSelfLocation_data.c $(START_DIR)/GetSelfLocation_initialize.c $(START_DIR)/GetSelfLocation_terminate.c $(START_DIR)/GetSelfLocation.c $(START_DIR)/randn.c $(START_DIR)/eml_randn.c $(START_DIR)/eml_rand.c $(START_DIR)/eml_rand_mcg16807_stateful.c $(START_DIR)/eml_rand_shr3cong_stateful.c $(START_DIR)/eml_rand_mt19937ar_stateful.c $(START_DIR)/rt_nonfinite.c $(START_DIR)/rtGetNaN.c $(START_DIR)/rtGetInf.c
+SRCS = $(START_DIR)/GetMeaPosition_data.c $(START_DIR)/GetMeaPosition_initialize.c $(START_DIR)/GetMeaPosition_terminate.c $(START_DIR)/GetMeaPosition.c $(START_DIR)/randn.c $(START_DIR)/eml_randn.c $(START_DIR)/eml_rand.c $(START_DIR)/eml_rand_mcg16807_stateful.c $(START_DIR)/eml_rand_shr3cong_stateful.c $(START_DIR)/eml_rand_mt19937ar_stateful.c
 
 ALL_SRCS = $(SRCS)
 
@@ -233,7 +233,7 @@ ALL_SRCS = $(SRCS)
 ## OBJECTS
 ###########################################################################
 
-OBJS = GetSelfLocation_data.o GetSelfLocation_initialize.o GetSelfLocation_terminate.o GetSelfLocation.o randn.o eml_randn.o eml_rand.o eml_rand_mcg16807_stateful.o eml_rand_shr3cong_stateful.o eml_rand_mt19937ar_stateful.o rt_nonfinite.o rtGetNaN.o rtGetInf.o
+OBJS = GetMeaPosition_data.o GetMeaPosition_initialize.o GetMeaPosition_terminate.o GetMeaPosition.o randn.o eml_randn.o eml_rand.o eml_rand_mcg16807_stateful.o eml_rand_shr3cong_stateful.o eml_rand_mt19937ar_stateful.o
 
 ALL_OBJS = $(OBJS)
 

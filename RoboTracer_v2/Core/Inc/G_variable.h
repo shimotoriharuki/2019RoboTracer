@@ -39,6 +39,7 @@ typedef struct {
 	char rotation;
 	char art;
 	char GSL_enable;
+	char IMU_offset;
 }Flag;
 
 typedef struct{
@@ -73,6 +74,12 @@ typedef struct{
 	float ki;
 	float kd;
 }pid_parameter;
+
+typedef struct{
+	float omega_x_l;
+	float omega_y_l;
+	float omega_z_l;
+}IMU_Offset;
 
 #ifdef DEF_EXTERN
 /* 自動生成変数(CubeMXから変更を加えた場合変える必要があるかも) -------------------------------------------------------------*/
@@ -154,6 +161,7 @@ Timer timer;
 Digital digital;
 sample smp = {{1,10,200,543,888}, 862};
 pid_parameter gain;
+IMU_Offset imu_offset;
 
 float imu_data[10000];
 float lowpassed_array[RETENTION_ARRAY_SIZE];
@@ -184,7 +192,12 @@ float xg_l, yg_l, zg_l;
 float various_memory1[MEMORY_ARRAY_SIZE_2];
 float various_memory2[MEMORY_ARRAY_SIZE_2];
 float various_memory3[MEMORY_ARRAY_SIZE_2];
-//float various_memory4[MEMORY_ARRAY_SIZE_2];
+float various_memory4[MEMORY_ARRAY_SIZE_2];
+float various_memory5[MEMORY_ARRAY_SIZE_2];
+float various_memory6[MEMORY_ARRAY_SIZE_2];
+//float various_memory7[MEMORY_ARRAY_SIZE_2];
+//float various_memory8[MEMORY_ARRAY_SIZE_2];
+//float various_memory9[MEMORY_ARRAY_SIZE_2];
 
 float omega_x, omega_y, omega_z;
 float alpha_x, alpha_y, alpha_z;
@@ -213,7 +226,18 @@ short msig[M_LEN] = {-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,-1,1,-1,1,-1,1,-1,-1,1,1,-1
 int16_t check_in = 0;
 float TargetOmega = 0;
 
-double TargetVelo[2] = {0, 0};
+double TargetVelo[2];
+double TargetInput[2];
+double DR_Position[3];
+double PreDR_Position[3];
+double RobotPosition[3];
+double PreRobotPosition[3];
+double MeaRobotPosition[3];
+
+double TruePosition[3];
+double PreTruePosition[3];
+
+double CurrentVelo[2];
 
 #else
 /* 自動生成変数 (CubeMXから変更を加えた場合変える必要があるかも)-------------------------------------------------------------*/
@@ -292,6 +316,7 @@ extern Timer timer;
 extern Digital digital;
 extern sample smp;
 extern pid_parameter gain;
+extern IMU_Offset imu_offset;
 
 extern short fresult;
 
@@ -324,6 +349,12 @@ extern float various_memory1[MEMORY_ARRAY_SIZE_2];
 extern float various_memory2[MEMORY_ARRAY_SIZE_2];
 extern float various_memory3[MEMORY_ARRAY_SIZE_2];
 extern float various_memory4[MEMORY_ARRAY_SIZE_2];
+extern float various_memory5[MEMORY_ARRAY_SIZE_2];
+extern float various_memory6[MEMORY_ARRAY_SIZE_2];
+//extern float various_memory7[MEMORY_ARRAY_SIZE_2];
+//extern float various_memory8[MEMORY_ARRAY_SIZE_2];
+//extern float various_memory9[MEMORY_ARRAY_SIZE_2];
+
 
 extern float omega_x, omega_y, omega_z;
 extern float alpha_x, alpha_y, alpha_z;
@@ -346,8 +377,19 @@ extern float imu_calibration;
 
 extern short msig[M_LEN];
 int16_t check_in;
-float TargetOmega;
+extern float TargetOmega;
 
-double TargetVelo[2];
+extern double TargetVelo[2];
+extern double TargetInput[2];
+extern double DR_Position[3];
+extern double PreDR_Position[3];
+extern double RobotPosition[3];
+extern double PreRobotPosition[3];
+extern double MeaRobotPosition[3];
+
+extern double TruePosition[3];
+extern double PreTruePosition[3];
+
+extern double CurrentVelo[2];
 
 #endif

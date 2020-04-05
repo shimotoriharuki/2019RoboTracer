@@ -5,7 +5,7 @@
  * File: GetSelfLocation.h
  *
  * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 24-Mar-2020 14:05:57
+ * C/C++ source code generated on  : 24-Mar-2020 17:34:25
  */
 
 #ifndef GETSELFLOCATION_H
@@ -19,8 +19,8 @@
 
 /* Function Declarations */
 extern void GetSelfLocation(const double PrePosition[3], const double PrePt[9],
-  double PreZt, const double velo[2], double EstPosition[3], double EstPt[9],
-  double *ObsZt);
+  double PreZt, const double velo[2], const double HatPosition[3], double
+  EstPosition[3], double EstPt[9], double *ObsZt);
 
 #endif
 

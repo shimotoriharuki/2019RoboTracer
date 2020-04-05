@@ -30,12 +30,19 @@
 #include "PathFollowing.h"             /* Model's header file */
 #include "rtwtypes.h"
 
+//#include "GetMeaPosition.h"
+//#include "GetMeaPosition_initialize.h"
+
 static void argInit_1x2_real_T(double result[2]);
 static void argInit_3x1_real_T(double result[3]);
 static void argInit_3x3_real_T(double result[9]);
 static double argInit_real_T(void);
 
 void rt_OneStep(void);
+
+static void argInit_1x2_real_T(double result[2]);
+static void argInit_3x1_real_T(double result[3]);
+static double argInit_real_T(void);
 
 /*
 #define BUFF_SIZE 128
@@ -221,25 +228,80 @@ char debug_lcd(){
 
 				lcd_clear();
 				lcd_locate(0,0);
-				lcd_printf("%lf", TargetVelo[0]);
+				lcd_printf("%lf", CurrentVelo[0]);
 				lcd_locate(0,1);
-				lcd_printf("%lf", TargetVelo[1]);
+				lcd_printf("%lf", CurrentVelo[1]);
 
 
 
 				if(SW(1)){
-					LED('R');
+
+					TargetInput[0] = 0.01;
+					TargetInput[1] = 0.001;
 					TargetVelo[0] = 1;
 					TargetVelo[1] = 0.1;
+
+					HAL_Delay(500);
+					LED('R');
+
+					flag.IMU_offset = 1;
+					HAL_Delay(3000);
+					flag.IMU_offset = 0;
+
+					LED('M');
 					flag.GSL_enable = 1;
-					HAL_Delay(5000);
-
-					LED('B');
-					sd_write_array("EstimationLocation", "x.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
-					sd_write_array("EstimationLocation", "y.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
-					sd_write_array("EstimationLocation", "th.txt", MEMORY_ARRAY_SIZE_2, various_memory3, OVER_WRITE);
-
+					HAL_Delay(10000);
 					flag.GSL_enable = 0;
+/*
+					for(int16_t i = 0; i < MEMORY_ARRAY_SIZE_2; i++){
+
+						//main_GetTruePosition(PreTruePosition, TargetInput, TruePosition);
+
+						//main_GetMeaPosition(PreDR_Position, TargetInput, DR_Position);
+
+						main_GetMeaPosition(PreRobotPosition, TargetInput, MeaRobotPosition);
+						main_GetSelfLocation(MeaRobotPosition, TargetVelo, RobotPosition);
+
+						various_memory1[i] = RobotPosition[0];
+						various_memory2[i] = RobotPosition[1];
+						various_memory3[i] = RobotPosition[2];
+						various_memory4[i] = DR_Position[0];
+						various_memory5[i] = DR_Position[1];
+						various_memory6[i] = DR_Position[2];
+						various_memory7[i] = TruePosition[0];
+						various_memory8[i] = TruePosition[1];
+						various_memory9[i] = TruePosition[2];
+
+						PreRobotPosition[0] = RobotPosition[0];
+						PreRobotPosition[1] = RobotPosition[1];
+						PreRobotPosition[2] = RobotPosition[2];
+						PreDR_Position[0] = DR_Position[0];
+						PreDR_Position[1] = DR_Position[1];
+						PreDR_Position[2] = DR_Position[2];
+						PreTruePosition[0] = TruePosition[0];
+						PreTruePosition[1] = TruePosition[1];
+						PreTruePosition[2] = TruePosition[2];
+
+					}
+*/
+					LED('B');
+					sd_write_array("DR_Location", "x.txt", MEMORY_ARRAY_SIZE_2, various_memory1, OVER_WRITE);
+					sd_write_array("DR_Location", "y.txt", MEMORY_ARRAY_SIZE_2, various_memory2, OVER_WRITE);
+					sd_write_array("DR_Location", "th.txt", MEMORY_ARRAY_SIZE_2, various_memory3, OVER_WRITE);
+
+					sd_write_array("EstimationLocation", "x.txt", MEMORY_ARRAY_SIZE_2, various_memory4, OVER_WRITE);
+					sd_write_array("EstimationLocation", "y.txt", MEMORY_ARRAY_SIZE_2, various_memory5, OVER_WRITE);
+					sd_write_array("EstimationLocation", "th.txt", MEMORY_ARRAY_SIZE_2, various_memory6, OVER_WRITE);
+					/*
+					sd_write_array("DR_Location", "x.txt", MEMORY_ARRAY_SIZE_2, various_memory4, OVER_WRITE);
+					sd_write_array("DR_Location", "y.txt", MEMORY_ARRAY_SIZE_2, various_memory5, OVER_WRITE);
+					sd_write_array("DR_Location", "th.txt", MEMORY_ARRAY_SIZE_2, various_memory6, OVER_WRITE);
+
+					sd_write_array("TrueLocation", "x.txt", MEMORY_ARRAY_SIZE_2, various_memory7, OVER_WRITE);
+					sd_write_array("TrueLocation", "y.txt", MEMORY_ARRAY_SIZE_2, various_memory8, OVER_WRITE);
+					sd_write_array("TrueLocation", "th.txt", MEMORY_ARRAY_SIZE_2, various_memory9, OVER_WRITE);
+					*/
+
 				}
 				else{
 					flag.GSL_enable = 0;
@@ -603,11 +665,10 @@ char running_processing(){
 	if(flag.side == 1)	LED('R');
 	else LED('N');
 	*/
-
 	/*----------------ゴール判定-------------------*/
 
-	if(start_goal_cnt >= 2)	ret = 1;
-	//if((total_encL + total_encR) / 2 >= 95000)	ret = 1;
+	//if(start_goal_cnt >= 2)	ret = 1;
+	if((total_encL + total_encR) / 2 >= 95000)	ret = 1;
 	//if(flag.log_store == 0) ret = 1;
 	if(flag.error == 1)	ret = -1;
 
@@ -789,7 +850,8 @@ void init(){
 	__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, 0);
 
 	GetSelfLocation_initialize();
-	PathFollowing_initialize();
+	//PathFollowing_initialize();
+	//GetMeaPosition_initialize();
 }
 
 //************************************************************************/
@@ -1671,12 +1733,16 @@ void updata_imu_data_lowpassed(){
 	omega_y_l = lowpass_filter_simple(omega_y, pre_yg, R);
 	omega_z_l = lowpass_filter_simple(omega_z, pre_zg, R);
 
-	alpha_x_l = lowpass_filter_simple(alpha_x, pre_xa, R);
-	alpha_y_l = lowpass_filter_simple(alpha_y, pre_ya, R);
-	alpha_z_l = lowpass_filter_simple(alpha_z, pre_za, R);
+	//alpha_x_l = lowpass_filter_simple(alpha_x, pre_xa, R);
+	//alpha_y_l = lowpass_filter_simple(alpha_y, pre_ya, R);
+	//alpha_z_l = lowpass_filter_simple(alpha_z, pre_za, R);
 
 	//omega_z_l -= imu_calibration;
-	yaw_angle += omega_z_l * DELTA_T;
+	//yaw_angle += omega_z_l * DELTA_T;
+
+	omega_x_l -= imu_offset.omega_x_l;
+	omega_y_l -= imu_offset.omega_y_l;
+	omega_z_l -= imu_offset.omega_z_l;
 
 	pre_xg = omega_x_l;
 	pre_yg = omega_y_l;
@@ -2054,8 +2120,8 @@ void store_log_data(char Flag){
 
 		//if(cnt >= 5){	//5ms 0.005 //10ms 0.01s
 			//various_memory1[access] = getEncorder_L();
-			various_memory1[access] = velo;
-			various_memory2[access] = check_in;
+			//various_memory1[access] = velo;
+			//various_memory2[access] = check_in;
 
 			//various_memory2[access] = getEncorder_R();
 			cnt = 0;
@@ -4114,9 +4180,9 @@ static double argInit_real_T(void)
  * Arguments    : void
  * Return Type  : void
  */
-void main_GetSelfLocation(double velo[2])
+void main_GetSelfLocation(double MeaPosition[3], double velo[2], double ResultPos[3])
 {
-  static uint16_t access;
+  //static uint16_t access;
   static double PrePosition[3];
   static double PrePt[9];
   static double PreZt;
@@ -4130,21 +4196,42 @@ void main_GetSelfLocation(double velo[2])
   /* Initialize function input argument 'PrePt'. */
   /* Initialize function input argument 'velo'. */
   /* Call the entry-point 'GetSelfLocation'. */
-  argInit_3x1_real_T(PrePosition);
-  argInit_3x3_real_T(PrePt);
-  argInit_1x2_real_T(velo);
+  //argInit_3x1_real_T(PrePosition);
+  //argInit_3x3_real_T(PrePt);
+  //argInit_1x2_real_T(velo);
+  //velo[0] = 1;
+  //velo[1] = 0.1;
 
-  GetSelfLocation(PrePosition, PrePt, PreZt, velo, EstPosition, EstPt, &ObsZt);
+  GetSelfLocation(PrePosition, PrePt, PreZt, velo, MeaPosition, EstPosition, EstPt, &ObsZt);
 
-  various_memory1[access] = EstPosition[0];
-  various_memory2[access] = EstPosition[1];
-  various_memory3[access] = EstPosition[2];
-  access++;
-  if(access >= MEMORY_ARRAY_SIZE_2 - 1) access = MEMORY_ARRAY_SIZE_2 - 1;
+  //various_memory1[access] = EstPosition[0];
+  //various_memory2[access] = EstPosition[1];
+  //various_memory3[access] = EstPosition[2];
 
-  memcpy(PrePosition, EstPosition, sizeof(EstPosition));
-  memcpy(PrePt, EstPt, sizeof(EstPt));
+  //access++;
+  //if(access >= MEMORY_ARRAY_SIZE_2 - 1) access = MEMORY_ARRAY_SIZE_2 - 1;
+
+  //memcpy(PrePosition, EstPosition, sizeof(EstPosition) / sizeof(EstPosition[0]));
+  //memcpy(PrePt, EstPt, sizeof(EstPt) / sizeof(EstPt[0]));
+  PrePosition[0] = EstPosition[0];
+  PrePosition[1] = EstPosition[1];
+  PrePosition[2] = EstPosition[2];
+
+  PrePt[0] = EstPt[0];
+  PrePt[1] = EstPt[1];
+  PrePt[2] = EstPt[2];
+  PrePt[3] = EstPt[3];
+  PrePt[4] = EstPt[4];
+  PrePt[5] = EstPt[5];
+  PrePt[6] = EstPt[6];
+  PrePt[7] = EstPt[7];
+  PrePt[8] = EstPt[8];
+
   PreZt = ObsZt;
+
+  ResultPos[0] = EstPosition[0];
+  ResultPos[1] = EstPosition[1];
+  ResultPos[2] = EstPosition[2];
 
 }
 
@@ -4178,4 +4265,91 @@ void rt_OneStep(void)
   /* Disable interrupts here */
   /* Restore FPU context here (if necessary) */
   /* Enable interrupts here */
+}
+
+
+
+/* DR position */
+/*
+ * Arguments    : void
+ * Return Type  : void
+ */
+void main_GetMeaPosition(double PrePos[3], double u[2], double ResultPos[3])
+{
+  //double dv0[3];
+  //double dv1[2];
+  double position[3];
+
+  /* Initialize function 'GetMeaPosition' input arguments. */
+  /* Initialize function input argument 'PrePosition'. */
+  /* Initialize function input argument 'u'. */
+  /* Call the entry-point 'GetMeaPosition'. */
+  //argInit_3x1_real_T(dv0);
+  //argInit_1x2_real_T(dv1);
+
+  GetMeaPosition(PrePos, u, position);
+
+  ResultPos[0] = position[0];
+  ResultPos[1] = position[1];
+  ResultPos[2] = position[2];
+  //memcpy(ResultPos, position, sizeof(position) / sizeof(position[0]));
+}
+void main_GetTruePosition(double PrePos[3], double u[2], double ResultPos[3])
+{
+  //double dv0[3];
+  //double dv1[2];
+  double position[3];
+
+  /* Initialize function 'GetMeaPosition' input arguments. */
+  /* Initialize function input argument 'PrePosition'. */
+  /* Initialize function input argument 'u'. */
+  /* Call the entry-point 'GetMeaPosition'. */
+  //argInit_3x1_real_T(dv0);
+  //argInit_1x2_real_T(dv1);
+
+  GetTruePosition(PrePos, u, position);
+
+  ResultPos[0] = position[0];
+  ResultPos[1] = position[1];
+  ResultPos[2] = position[2];
+  //memcpy(ResultPos, position, sizeof(position) / sizeof(position[0]));
+}
+
+char CalcIMUoffset(char enable){
+	char ret = 0;
+	static float total_omega_z_l;
+	static uint16_t count;
+
+	if(enable){
+		count++;
+		total_omega_z_l += omega_z_l;
+		imu_offset.omega_z_l = total_omega_z_l / count;
+	}
+	else{
+		count = 0;
+		total_omega_z_l = 0;
+	}
+
+	return ret;
+}
+
+void GetPosition(double PrePosition[3], double Position[3], double Velo[2], char enable){
+	float theta = 0;
+	float Length = 0;
+
+	if(enable){
+		Length = Velo[0] * 0.01;		//[m]
+		theta = Velo[1] * 0.01;			//[rad]
+
+		Position[0] = PrePosition[0] + Length * cos(theta);
+		Position[1] = PrePosition[1] + Length * sin(theta);
+		Position[2] = PrePosition[2] + theta;
+	}
+
+}
+
+void GetDR_Position(double PrePostion[3], double DR_Position[3], char enable){
+	if(enable){
+
+	}
 }
