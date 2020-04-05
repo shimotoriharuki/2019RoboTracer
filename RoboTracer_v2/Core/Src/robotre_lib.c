@@ -4333,17 +4333,31 @@ char CalcIMUoffset(char enable){
 	return ret;
 }
 
-void GetPosition(double PrePosition[3], double Position[3], double Velo[2], char enable){
-	float theta = 0;
+void GetPosition1(double PrePosition[3], double Position[3], double Velo[2], char enable){
+	static float theta = 0;
 	float Length = 0;
 
 	if(enable){
 		Length = Velo[0] * 0.01;		//[m]
-		theta = Velo[1] * 0.01;			//[rad]
+		theta = PrePosition[2] + (Velo[1] * 0.01)/2;			//[rad]
 
 		Position[0] = PrePosition[0] + Length * cos(theta);
 		Position[1] = PrePosition[1] + Length * sin(theta);
-		Position[2] = PrePosition[2] + theta;
+		Position[2] = PrePosition[2] + (Velo[1] * 0.01)/2;
+	}
+
+}
+void GetPosition2(double PrePosition[3], double Position[3], double Velo[2], char enable){
+	static float theta = 0;
+	float Length = 0;
+
+	if(enable){
+		Length = Velo[0] * 0.01;		//[m]
+		theta = PrePosition[2] + (Velo[1] * 0.01)/2;			//[rad]
+
+		Position[0] = PrePosition[0] + Length * cos(theta);
+		Position[1] = PrePosition[1] + Length * sin(theta);
+		Position[2] = PrePosition[2] + (Velo[1] * 0.01)/2;
 	}
 
 }

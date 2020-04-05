@@ -101,7 +101,8 @@ void main_GetMeaPosition(double *, double *, double *);
 void main_GetTruePosition(double *, double *, double *);
 
 char CalcIMUoffset(char);
-void GetPosition(double *, double *, double *, char enable);
+void GetPosition1(double *, double *, double *, char enable);
+void GetPosition2(double *, double *, double *, char enable);
 void GetDR_Position(double *, double *, char enable);
 
 #endif

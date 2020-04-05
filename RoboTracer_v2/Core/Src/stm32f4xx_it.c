@@ -286,6 +286,8 @@ void TIM6_DAC_IRQHandler(void)
 	SumPulse = (getEncorder_L() + getEncorder_R()) / 2;
 	SumVelo[0] += MM_PER_PULS * SumPulse;	//[m/s]
 	SumVelo[1] += omega_z_l;	//[rad/s]
+	//SumVelo[0] += 10;	//[m/s]
+	//SumVelo[1] += 1;	//[rad/s]
 
 	if(cnt >= 10){	//10ms
 		static uint16_t access;
@@ -299,10 +301,10 @@ void TIM6_DAC_IRQHandler(void)
 
 		if(flag.GSL_enable == 1){
 
-			GetPosition(PreDR_Position, DR_Position, CurrentVelo, flag.GSL_enable);
+			GetPosition1(PreDR_Position, DR_Position, CurrentVelo, flag.GSL_enable);
 
-			//GetPosition(PreRobotPosition, MeaRobotPosition, CurrentVelo, flag.GSL_enable);
-			//main_GetSelfLocation(MeaRobotPosition, CurrentVelo, RobotPosition);
+			GetPosition2(PreRobotPosition, MeaRobotPosition, CurrentVelo, flag.GSL_enable);
+			main_GetSelfLocation(MeaRobotPosition, CurrentVelo, RobotPosition);
 
 			various_memory1[access] = DR_Position[0];
 			various_memory2[access] = DR_Position[1];
