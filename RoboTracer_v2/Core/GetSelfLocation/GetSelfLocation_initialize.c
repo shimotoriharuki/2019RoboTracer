@@ -32,11 +32,11 @@ void GetSelfLocation_initialize(void)
   method_not_empty_init();
   dt = 0.01;
   Tred = 0.126;
-  Qt = 0.001;
-  ErrerParameter[0] = 1;
-  ErrerParameter[1] = 1;
-  ErrerParameter[2] = 1;
-  ErrerParameter[3] = 1;
+  Qt = 1e-6;
+  ErrerParameter[0] = 1e-5;
+  ErrerParameter[1] = 1e-5;
+  ErrerParameter[2] = 1e-5;
+  ErrerParameter[3] = 1e-5;
   eml_rand_init();
   eml_rand_mcg16807_stateful_init();
   eml_rand_shr3cong_stateful_init();

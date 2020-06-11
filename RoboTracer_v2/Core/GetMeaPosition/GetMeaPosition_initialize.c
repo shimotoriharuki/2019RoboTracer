@@ -28,10 +28,10 @@ void GetMeaPosition_initialize(void)
 {
   state_not_empty_init();
   method_not_empty_init();
-  ErrerParameter[0] = 1;
-  ErrerParameter[1] = 1;
-  ErrerParameter[2] = 1;
-  ErrerParameter[3] = 1;
+  ErrerParameter[0] = 0.1;
+  ErrerParameter[1] = 0.1;
+  ErrerParameter[2] = 0.1;
+  ErrerParameter[3] = 0.1;
   eml_rand_init();
   eml_rand_mcg16807_stateful_init();
   eml_rand_shr3cong_stateful_init();

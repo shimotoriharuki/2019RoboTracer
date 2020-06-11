@@ -322,9 +322,9 @@ void TIM6_DAC_IRQHandler(void)
 			PreRobotPosition[1] = RobotPosition[1];
 			PreRobotPosition[2] = RobotPosition[2];
 
-			MeaRobotPosition[0] = 0;
-			MeaRobotPosition[1] = 0;
-			MeaRobotPosition[2] = 0;
+			//MeaRobotPosition[0] = 0;
+			//MeaRobotPosition[1] = 0;
+			//MeaRobotPosition[2] = 0;
 
 
 			access++;

@@ -275,7 +275,7 @@ int main(void)
 				LED('R');
 				//CalcIMUoffset();
 				flag.IMU_offset = 1;
-				HAL_Delay(1000);
+				HAL_Delay(3000);
 				flag.IMU_offset = 0;
 
 				stage = 26;

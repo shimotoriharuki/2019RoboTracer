@@ -240,7 +240,9 @@ char debug_lcd(){
 					TargetInput[1] = 0.001;
 					TargetVelo[0] = 1;
 					TargetVelo[1] = 0.1;
+					error_reset();
 
+					flag.following = 1;
 					HAL_Delay(500);
 					LED('R');
 
@@ -250,8 +252,18 @@ char debug_lcd(){
 
 					LED('M');
 					flag.GSL_enable = 1;
+
+					robot_speed = 300;
+
+					flag.line_trace = 1;
 					HAL_Delay(10000);
+
+					robot_speed = 0;
+					flag.following = 0;
+					flag.line_trace = 0;
+
 					flag.GSL_enable = 0;
+					flag.error = 1;
 /*
 					for(int16_t i = 0; i < MEMORY_ARRAY_SIZE_2; i++){
 
